@@ -294,7 +294,6 @@ private:
     int iterationRate = ITERATION_RATE;
     int iterateCounter = 0;
     int lastTick = SDL_GetTicks();
-    bool isComplete = false;    
 
     while ( !m_quit ) {
       OS->poll();

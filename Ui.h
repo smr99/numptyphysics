@@ -160,7 +160,7 @@ class RichText : public Label
  protected:
   struct Snippet {
     Vec2 pos;
-    int textoff;
+    size_t textoff;
     int textlen;
     int align;
     const Font* font;

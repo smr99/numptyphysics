@@ -113,7 +113,7 @@ SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy)
   
     int x, y, sx, sy, *sax, *say, *csax, *csay, csx, csy, ex, ey, t1, t2, sstep;
     tColorRGBA *c00, *c01, *c10, *c11;
-    tColorRGBA *sp, *csp, *dp;
+    tColorRGBA *csp, *dp;
     int dgap;
 
    /*
@@ -140,7 +140,7 @@ SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy)
     /*
      * Precalculate row increments 
      */
-    sp = csp = (tColorRGBA *) rz_src->pixels;
+    csp = (tColorRGBA *) rz_src->pixels;
     dp = (tColorRGBA *) rz_dst->pixels;
 
     if (flipx) csp += (rz_src->w-1);
@@ -254,7 +254,8 @@ SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy)
    /*
     * Call the 8bit transformation routine to do the zooming 
     */
-         Uint32 x, y, sx, sy, *sax, *say, *csax, *csay, csx, csy;
+	 int x, y;
+         Uint32 sx, sy, *sax, *say, *csax, *csay, csx, csy;
          Uint8 *sp, *dp, *csp;
          int dgap;
 

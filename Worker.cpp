@@ -64,4 +64,5 @@ int WorkerBase::startThread(void* wbase)
   event.user.data1 = wbase;
   event.user.data2 = 0;
   SDL_PushEvent(&event);
+  return 0;
 }

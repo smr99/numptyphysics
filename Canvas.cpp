@@ -53,7 +53,7 @@ extern SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy);
   ((((r)<<8)&0xff0000) | ((g)&0x00ff00) | (((b)>>8)))
 
 #define R16G16B16_TO_RGB565(r,g,b) \
-  ((Uint16)( (((r)&0xf800) | (((g)>>5)&0x07e0) | (((b)>>11))&0x001f) ))
+  ((Uint16)( ((r)&0xf800) | (((g)>>5)&0x07e0) | (((b)>>11)&0x001f) ))
 
 #define RGB888_TO_RGB565(p) \
   ((Uint16)( (((p)>>8)&0xf800) | (((p)>>5)&0x07e0) | (((p)>>3)&0x001f) ))
@@ -869,6 +869,9 @@ int Canvas::writeBMP( const char* filename ) const
   int check_BMPINFOHEADER[(sizeof(BMPINFOHEADER)==40)-1];
 #pragma pack(pop)
     
+  if (sizeof(check_BMPHEADER) != 0 || sizeof(check_BMPINFOHEADER) != 0)
+      return 0;
+  
   int w = width();
   int h = height();
   BMPHEADER     head = { 'B'|('M'<<8), 14+40+w*h*3, 0, 0, 14+40 };

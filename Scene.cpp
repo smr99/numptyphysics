@@ -615,8 +615,10 @@ void Scene::moveStroke( Stroke* s, const Vec2& origin )
 
 bool Scene::activateStroke( Stroke *s )
 {
-  activate(s);
+  if (!activate(s))
+    return false;
   m_recorder.activateStroke( m_strokes.indexOf(s) );
+  return true;
 }
 
 void Scene::getJointCandidates( Stroke* s, Path& pts )
@@ -854,7 +856,7 @@ void Scene::setGravity( const b2Vec2& g )
 
 void Scene::setGravity( const std::string& s )
 {
-  for (int i=0; i<s.find(':'); i++) {
+  for (size_t i=0; i<s.find(':'); i++) {
     switch (s[i]) {
     case 'd': m_dynamicGravity = true; break;
     }

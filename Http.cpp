@@ -172,8 +172,10 @@ bool Http::post( const char* uri, const char*putname, const char* putfile,
       }
     } catch ( Wobbly w ) {
       fprintf(stderr,"http_get wobbly: %s\n",w.what());
+      return false;
     }
   }
+  return true;
 }
 
 

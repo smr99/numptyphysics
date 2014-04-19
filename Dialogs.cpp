@@ -200,8 +200,9 @@ public:
 //       //Event closeEvent(Event::CLOSE);
 //       //m_parent->dispatchEvent(closeEvent);
 //       return true;
+    default:
+      return MenuPage::onEvent(ev);
     }
-    return MenuPage::onEvent(ev);
   }
 };
 
@@ -561,8 +562,9 @@ public:
       }
       updateTicks();
       return true;
+    default:
+      return MenuDialog::onEvent(ev);	  
     }
-    return MenuDialog::onEvent(ev);
   }
 private:
   GameControl *m_game;

@@ -295,7 +295,6 @@ void IconButton::draw( Canvas& screen, const Rect& area )
       screen.drawRect(m_pos,screen.makeColour(SELECTED_BG),true);
     }
     Vec2 textsize = m_font->metrics(m_text);    
-    int gap = (m_vertical ?  : m_pos.width()) / 10;
     if (m_vertical) {
       int x = m_pos.centroid().x - m_icon->width()/2; 
       int y = m_pos.centroid().y - m_icon->height()/2 - textsize.y/2; 
@@ -415,7 +414,6 @@ int RichText::layout(int w)
   //fprintf(stderr,"layout w=%d \"%s\"\n",w,m_text.c_str());
 
   while (p != std::string::npos) {
-    int wordwidth;
     bool newline = false;
     size_t e = m_text.find_first_of(" \t\n\r<>", p); 
 
@@ -590,6 +588,8 @@ bool Draggable::onPreEvent( Event& ev )
       m_internalEvent = false;
       return result;
     }
+    break;
+  default:
     break;
   }
   return false;
@@ -1106,6 +1106,7 @@ bool Dialog::close()
     //fprintf(stderr,"close dialog\n");    
     m_closeRequested = true;
   }
+  return true;
 }
 
 
