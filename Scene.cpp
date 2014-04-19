@@ -128,6 +128,7 @@ public:
   Stroke( const Path& path )
     : m_rawPath(path)
   {
+    m_body = 0;
     m_colour = brushColours[DEFAULT_BRUSH];
     m_attributes = 0;
     m_origin = m_rawPath.point(0);
@@ -138,6 +139,7 @@ public:
   Stroke( const std::string& str ) 
   {
     int col = 0;
+    m_body = 0;
     m_colour = brushColours[DEFAULT_BRUSH];
     m_attributes = 0;
     m_origin = Vec2(400,240);
