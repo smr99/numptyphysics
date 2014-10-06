@@ -1,4 +1,4 @@
-
+CXXFLAGS = -O2 -Wall
 APP = numptyphysics
 
 DESTDIR ?=

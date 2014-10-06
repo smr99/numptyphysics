@@ -254,9 +254,9 @@ void Icon::draw( Canvas& screen, const Rect& area )
 
 IconButton::IconButton(const std::string& s, const std::string& icon, const Event& ev)
   : Button(s,ev),
-    m_icon(icon.size()==0?NULL:new Image(icon.c_str(),true)),
+    m_vertical(true),
     m_ownIcon(true),
-    m_vertical(true)
+    m_icon(icon.size()==0?NULL:new Image(icon.c_str(),true))
 {
 }
 

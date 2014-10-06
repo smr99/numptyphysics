@@ -98,9 +98,9 @@ public:
   LevelSelector(GameControl* game, int initialLevel)
     : m_game(game),
       m_levels(game->m_levels),
+      m_collection(0),
       m_dispbase(0),
-      m_dispcount(0),
-      m_collection(0)
+      m_dispcount(0)
   {
     m_scroll = new ScrollArea();
     m_scroll->fitToParent(true);

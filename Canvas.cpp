@@ -451,11 +451,19 @@ void Canvas::scale( int w, int h )
   }
 }
 
+template <typename CoordType, typename SizeType>
+SDL_Rect make_SDL_Rect(const CoordType& x, const CoordType& y,
+		       const SizeType& w, const SizeType& h)
+{
+    SDL_Rect r = { static_cast<Sint16>(x), static_cast<Sint16>(y), 
+		   static_cast<Uint16>(w), static_cast<Uint16>(h) };
+    return r;		   
+}
 
 void Canvas::clear( const Rect& r )
 {
   if ( m_bgImage ) {
-    SDL_Rect srcRect = { r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1 };
+    SDL_Rect srcRect = make_SDL_Rect(r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1);
     SDL_BlitSurface( SURFACE(m_bgImage), &srcRect, SURFACE(this), &srcRect );
   } else {
     drawRect( r, m_bgColour );
@@ -472,8 +480,8 @@ void Canvas::drawImage( Canvas *canvas, int x, int y )
 // 	    dest.tl.x, dest.tl.y, dest.br.x, dest.br.y);
 //   }
 
-  SDL_Rect sdlsrc = { dest.tl.x-x, dest.tl.y-y, dest.width(), dest.height() };
-  SDL_Rect sdldst = { dest.tl.x, dest.tl.y, 0, 0 };
+  SDL_Rect sdlsrc = make_SDL_Rect(dest.tl.x-x, dest.tl.y-y, dest.width(), dest.height());
+  SDL_Rect sdldst = make_SDL_Rect(dest.tl.x, dest.tl.y, 0, 0);
   SDL_BlitSurface( SURFACE(canvas), &sdlsrc, SURFACE(this), &sdldst );
 }
 
@@ -607,10 +615,10 @@ void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill )
   if ( fill ) {
     Rect dest(x,y,x+w,y+h);
     dest.clipTo(m_clip);
-    SDL_Rect r = { dest.tl.x, dest.tl.y, dest.width(), dest.height() };
+    SDL_Rect r = make_SDL_Rect(dest.tl.x, dest.tl.y, dest.width(), dest.height());
     SDL_FillRect( SURFACE(this), &r, c );
   } else {
-    SDL_Rect f = { x, y, w, h };
+    SDL_Rect f = make_SDL_Rect(x, y, w, h);
     SDL_Rect r;
     r=f; r.h=1; SDL_FillRect( SURFACE(this), &r, c );
     r.y+=f.h-1; SDL_FillRect( SURFACE(this), &r, c );
@@ -874,8 +882,8 @@ int Canvas::writeBMP( const char* filename ) const
   
   int w = width();
   int h = height();
-  BMPHEADER     head = { 'B'|('M'<<8), 14+40+w*h*3, 0, 0, 14+40 };
-  BMPINFOHEADER info = { 40, w, h, 1, 24, 0, w*h*3, 100, 100, 0, 0 };
+  BMPHEADER     head = { 'B'|('M'<<8), 14+40+w*h*3u, 0, 0, 14+40 };
+  BMPINFOHEADER info = { 40, w, h, 1, 24, 0, w*h*3u, 100, 100, 0, 0 };
 
   FILE *f = fopen( filename, "wb" );
   if ( f ) {

@@ -70,9 +70,9 @@ public:
     m_pauseLabel( NULL ),
     m_editLabel( NULL ),
     m_completedDialog( NULL ),
-    m_isCompleted(false),
     m_options( NULL ),
     m_os( Os::get() ),
+    m_isCompleted(false),
     m_jointInd(JOINT_IND_PATH)
   {
     setEventMap(Os::get()->getEventMap(GAME_MAP));

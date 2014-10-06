@@ -47,13 +47,13 @@ struct GameControl
 		 m_refresh( true ),
                  m_fade(false),
 		 m_colour( 2 ),
+                 m_clickMode(0),
 		 m_strokeFixed( false ),
 		 m_strokeSleep( false ),
 		 m_strokeDecor( false ),
                  m_replaying( false ),
                  m_paused( false ),
-                 m_level(0),
-                 m_clickMode(0)
+                 m_level(0)
   {}
   virtual ~GameControl() {}
   virtual bool save( const char *file=NULL ) =0;

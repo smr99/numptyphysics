@@ -15,8 +15,8 @@ Swipe::lock(bool locked)
     unsigned int customRegion[] = {
         0,
         0,
-        locked?854:0,
-        locked?480:0,
+        locked?854u:0,
+        locked?480u:0,
     };
 
     Atom customRegionAtom = XInternAtom(m_syswminfo.info.x11.display,
