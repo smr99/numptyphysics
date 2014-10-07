@@ -291,7 +291,6 @@ void Canvas::resetClip()
 
 void Canvas::setClip( int x, int y, int w, int h )
 {
-  //fprintf(stderr,"setclip %d,%d+%d+%d\n",x,y,w,h);
   m_clip = Rect(x,y,x+w-1,y+h-1);
 }
 
@@ -474,11 +473,6 @@ void Canvas::drawImage( Canvas *canvas, int x, int y )
 {
   Rect dest(x,y,x+canvas->width(),y+canvas->height());
   dest.clipTo(m_clip);
-//   if (dest.tl.y != y) {
-//     fprintf(stderr,"clipped (%d,%d-%d,%d) to (%d,%d)-(%d,%d)\n",
-// 	    x,y,x+canvas->width(),y+canvas->height(),
-// 	    dest.tl.x, dest.tl.y, dest.br.x, dest.br.y);
-//   }
 
   SDL_Rect sdlsrc = make_SDL_Rect(dest.tl.x-x, dest.tl.y-y, dest.width(), dest.height());
   SDL_Rect sdldst = make_SDL_Rect(dest.tl.x, dest.tl.y, 0, 0);
@@ -675,9 +669,6 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
   SDL_SysWMinfo sys;
   SDL_VERSION( &sys.version );
   SDL_GetWMInfo( &sys );
-  printf("X11 window =%08x\n",sys.info.x11.window);
-  printf("X11 fswindow =%08x\n",sys.info.x11.fswindow);
-  printf("X11 wmwindow =%08x\n",sys.info.x11.wmwindow);
 
   uint32_t pid = getpid();
   XChangeProperty( sys.info.x11.display,
@@ -822,7 +813,6 @@ Image::Image( const char* file, bool alpha )
     img = IMG_Load((f+file).c_str());
   }
   if ( img ) {
-    printf("loaded image %s\n",(f+file).c_str());
     if ( alpha ) {
       SDL_SetColorKey( img,
  		       SDL_SRCCOLORKEY|SDL_RLEACCEL,
@@ -834,11 +824,9 @@ Image::Image( const char* file, bool alpha )
     if ( m_state ) {
       SDL_FreeSurface( img );
     } else {
-      printf("warning image %s not converted to display format\n",(f+file).c_str());
       m_state = img;
     }
   } else {
-    fprintf(stderr,"failed to load image %s\n",(f+file).c_str());
     m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, 32, 32, 
 				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
 				    SDL_GetVideoInfo()->vfmt->Rmask,

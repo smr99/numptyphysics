@@ -206,43 +206,14 @@ inline Fixed Fixed::operator -() const { return Fixed(RAW,-g); }
 inline Fixed Fixed::operator +(const Fixed a) const { return Fixed(RAW, g + a.g); }
 inline Fixed Fixed::operator -(const Fixed a) const { return Fixed(RAW, g - a.g); }
 
-#if 1
 // more acurate, using long long
 inline Fixed Fixed::operator *(const Fixed a) const { return Fixed(RAW,  (int)( ((long long)g * (long long)a.g ) >> BP)); }
-
-#elif 0
-
-// check for overflow and figure out where.  Must specify -rdynamic in linker
-#include <execinfo.h>
-#include <signal.h>
-#include <exception>
-
-inline Fixed Fixed::operator *(const Fixed a) const {
-	long long x =  ((long long)g * (long long)a.g );
-	if(x > 0x7fffffffffffLL || x < -0x7fffffffffffLL) {
-		printf("overflow");
-		void *array[2];
-		int nSize = backtrace(array, 2);
-		char **symbols = backtrace_symbols(array, nSize);
-		for(int i=0; i<nSize; i++) {
-			printf(" %s", symbols[i]);
-		}
-		printf("\n");
-	}
-	return Fixed(RAW, (int)(x>>BP)); 
-}
-
-#else
-// faster, but with only half as many bits right of binary point
-inline Fixed Fixed::operator *(const Fixed a) const { return Fixed(RAW, (g>>BPhalf) * (a.g>>BPhalf) ); }
-#endif
 
 
 #ifdef TARGET_IS_NDS
 // Division using the DS's maths coprocessor
 inline Fixed Fixed::operator /(const Fixed a) const
 {
-	//printf("%d %d\n", (long long)g << BP, a.g);
 	return Fixed(RAW, int( div64((long long)g << BP, a.g) ) );
 }
 #else

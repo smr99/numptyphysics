@@ -119,13 +119,11 @@ void Path::simplify( float32 threshold )
       at(k++) = at(i);
     }
   }
-  //printf("simplify %f %dpts to %dpts\n",threshold,size(),k);
   trim( size() - k );
 
   // remove duplicate points (shouldn't be any)
   for ( int i=size()-1; i>0; i-- ) {
     if ( at(i) == at(i-1) ) {
-      //printf("alert: duplicate pt %d == %d!\n",i,i-1);
       erase( i );
     }
   }

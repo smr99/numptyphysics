@@ -24,6 +24,7 @@
 #include <glibconfig.h>
 #include <glib/gmacros.h>
 #include <libosso.h>
+#include <stdexcept>
 
 #include <gtk/gtk.h>
 
@@ -118,8 +119,7 @@ class OsHildon : public Os, private Accelerometer
 
     m_osso = osso_initialize(NP_NAME, NP_VERSION, FALSE, m_gcontext);
     if (m_osso == NULL) {
-      fprintf(stderr, "Failed to initialize libosso\n");
-      return;
+	throw std::runtime_error("Failed to initialize libosso");
     }
     
     /* Set dbus handler to get mime open callbacks */
@@ -128,7 +128,7 @@ class OsHildon : public Os, private Accelerometer
 			   NP_OBJECT,
 			   NP_INTERFACE,
 			   mime_handler, NULL) != OSSO_OK) {
-      fprintf(stderr, "Failed to set mime callback\n");
+      throw std::runtime_error("Failed to set mime callback");
     }
 
 #if MAEMO_VERSION >= 5
@@ -173,7 +173,6 @@ class OsHildon : public Os, private Accelerometer
   {
     // run the gobject main loop for dbus ops
     if ( g_main_context_iteration( m_gcontext, FALSE ) ) {
-      fprintf(stderr, "Hildon::poll event!\n");
     }
 #if MAEMO_VERSION >= 5
     // poll the proximity sensor to emulate esc key (undo)
@@ -254,7 +253,6 @@ static gint mime_handler(const gchar *interface,
       osso_rpc_t val = g_array_index(arguments, osso_rpc_t, i);
       if (val.type == DBUS_TYPE_STRING && val.value.s != NULL) {
 	char *f = NULL;
-	fprintf(stderr,"hildon mime open \"%s\"\n",val.value.s);
 	if ( strncmp(val.value.s,"file://",7)==0 
 	     && os->m_numFiles < MAX_FILES ) {
 	  f = val.value.s+7;

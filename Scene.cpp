@@ -21,6 +21,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <stdexcept>
 
 
 Transform::Transform( float32 scale, float32 rotation, const Vec2& translation )
@@ -169,7 +170,6 @@ public:
     if ( m_rawPath.size() < 2 ) {
       throw "invalid stroke def";
     }
-    //fprintf(stderr,"created stroke with %d points\n",m_rawPath.size());
     m_origin = m_rawPath.point(0);
     m_rawPath.translate( -m_origin );
     setAttribute( ATTRIB_DUMMY );
@@ -311,7 +311,6 @@ public:
 	if ( !m_jointed[end] ) {
 	  const Vec2& p = m_xformedPath.point( end ? n-1 : 0 );
 	  if ( other->distanceTo( p ) <= JOINT_TOLERANCE ) {
-	    //printf("jointed end %d d=%f\n",end,other->distanceTo( p ));
 	    b2Vec2 pw = p;
 	    pw *= 1.0f/PIXELS_PER_METREf;
 	    JointDef j( m_body, other->m_body, pw );
@@ -383,7 +382,6 @@ public:
     for ( int i=1; i<m_xformedPath.numPoints(); i++ ) {    
       Segment s( m_xformedPath.point(i-1), m_xformedPath.point(i) );
       float32 d = s.distanceTo( pt );
-      //printf("  d[%d]=%f %d,%d\n",i,d,m_rawPath.point(i-1).x,m_rawPath.point(i-1).y);
       if ( d < best ) {
         best = d;
       }
@@ -452,7 +450,6 @@ private:
     float32 thresh = SIMPLIFY_THRESHOLDf;
     m_rawPath.simplify( thresh );
     m_shapePath = m_rawPath;
-    //fprintf(stderr,"simplified stroke to %d points\n",m_rawPath.size());
 
     while ( m_shapePath.numPoints() > MULTI_VERTEX_LIMIT ) {
       thresh += SIMPLIFY_THRESHOLDf;
@@ -465,7 +462,6 @@ private:
     // distinguish between xformed raw and shape path as needed
     if ( m_hide ) {
       if ( m_hide < HIDE_STEPS ) {
-	//printf("hide %d\n",m_hide);
 	Vec2 o = m_screenBbox.centroid();
 	m_screenPath -= o;
 	m_screenPath.scale( 0.99 );
@@ -482,7 +478,6 @@ private:
 	return false; // ground strokes never move.
       } else if ( m_xformAngle != m_body->GetAngle() 
 	   ||  ! (m_xformPos == m_body->GetPosition()) ) {
-	//printf("transform stroke - rot or pos\n");
 	b2Mat22 rot( m_body->GetAngle() );
 	b2Vec2 orig = PIXELS_PER_METREf * m_body->GetPosition();
 	m_xformedPath = m_rawPath;
@@ -493,11 +488,9 @@ private:
 	worldToScreen.transform( m_xformedPath, m_screenPath );
 	m_screenBbox = m_screenPath.bbox();      
       } else {
-	//printf("transform none\n");
 	return false;
       }
     } else {
-      //printf("transform no body\n");
       m_xformedPath = m_rawPath;
       m_xformedPath.translate( m_origin );
       worldToScreen.transform( m_xformedPath, m_screenPath );
@@ -663,7 +656,6 @@ void Scene::createJoints( Stroke *s )
   Array<Joint> joints;
   for ( int j=m_strokes.size()-1; j>=0; j-- ) {      
     if ( s != m_strokes[j] && m_strokes[j]->body() ) {
-	//printf("try join to %d\n",j);
       s->determineJoints( m_strokes[j], joints );
       m_strokes[j]->determineJoints( s, joints );
       for ( int i=0; i<joints.size(); i++ ) {
@@ -685,7 +677,6 @@ void Scene::step( bool isPaused )
       if ( m_accelerometer->poll( gx, gy, gz ) ) {
 	
 	if (m_dynamicGravity || gx*gx+gy*gy > 1.2*1.2)  {
-	  //fprintf(stderr,"dynamic grav = %f,%f\n", gx, gy );
 	  const float32 factor = GRAVITY_ACCELf*PIXELS_PER_METREf/GRAVITY_FUDGEf;
 	  m_currentGravity = b2Vec2( m_gravity.x + gx*factor, 
 				     m_gravity.y + gy*factor );
@@ -746,7 +737,6 @@ bool Scene::isCompleted()
 	return false;
     }
   }
-  //printf("completed!\n");
   return true;
 }
 
@@ -774,7 +764,6 @@ void Scene::calcDirtyArea()
     // expand to allow for thick lines
     r.grow(1);
   }
-  //fprintf(stderr,"scene dirty %d,%d-%d,%d!\n",r.tl.x,r.tl.y,r.br.x,r.br.y);
   m_dirtyArea = r;
 }
 void Scene::draw( Canvas& canvas, const Rect& area )
@@ -819,7 +808,6 @@ Stroke* Scene::strokeAtPoint( const Vec2 pt, float32 max )
   Stroke* best = NULL;
   for ( int i=0; i<m_strokes.size(); i++ ) {
     float32 d = m_strokes[i]->distanceTo( pt );
-    //printf("stroke %d dist %f\n",i,d);
     if ( d < max ) {
 	max = d;
 	best = m_strokes[i];
@@ -871,7 +859,7 @@ void Scene::setGravity( const std::string& s )
 	setGravity( g );
     }
   } else {
-    fprintf(stderr,"invalid gravity vector [%s]\n",vector.c_str());
+    throw std::invalid_argument(std::string("invalid gravity vector: " + vector));
   }
 }
 
@@ -904,7 +892,6 @@ bool Scene::load( std::istream& in )
     parseLine( line );
   }
   protect();
-  printf("loaded log=%d\n",m_log.size());
   return true;
 }
 
@@ -934,7 +921,7 @@ bool Scene::parseLine( const std::string& line )
     case 'E': m_log.append(line.substr(line.find(':')+1));return true;
     }
   } catch ( const char* e ) {
-    printf("Stroke error: %s\n",e);
+      throw std::invalid_argument(std::string("Stroke error: ") + e);
   }
   return false;
 }
@@ -946,7 +933,6 @@ void Scene::protect( int n )
 
 bool Scene::save( const std::string& file, bool saveLog )
 {
-  printf("saving to %s\n",file.c_str());
   std::ofstream o( file.c_str(), std::ios::out );
   if ( o.is_open() ) {
     o << "Title: "<<m_title<<std::endl;

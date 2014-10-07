@@ -267,8 +267,6 @@ void Connection::connect()
 	if( m_Sock < 0 )
 		BailOnSocketError( "socket()" );
 
-//	printf("Connecting to %s on port %d.\n",inet_ntoa(*addr), port);
-
 	if( ::connect( m_Sock, (sockaddr const*)&address, sizeof(address) ) < 0 )
 		BailOnSocketError( "connect()" );
 }
@@ -400,8 +398,6 @@ void Connection::endheaders()
 		msg += (*it) + "\r\n";
 
 	m_Buffer.clear();
-
-//	printf( "%s", msg.c_str() );
 	send( (const unsigned char*)msg.c_str(), msg.size() );
 }
 
@@ -741,12 +737,6 @@ void Response::ProcessStatusLine( std::string const& line )
 	if( m_Status < 100 || m_Status > 999 )
 		throw Wobbly( "BadStatusLine (%s)", line.c_str() );
 
-/*
-	printf( "version: '%s'\n", m_VersionString.c_str() );
-	printf( "status: '%d'\n", m_Status );
-	printf( "reason: '%s'\n", m_Reason.c_str() );
-*/
-
 	if( m_VersionString == "HTTP:/1.0" )
 		m_Version = 10;
 	else if( 0==m_VersionString.compare( 0,7,"HTTP/1." ) )
@@ -786,8 +776,6 @@ void Response::FlushHeader()
 	value = p; // rest of line is value
 
 	m_Headers[ header ] = value;
-//	printf("header: ['%s': '%s']\n", header.c_str(), value.c_str() );	
-
 	m_HeaderAccum.clear();
 }
 
@@ -887,14 +875,6 @@ void Response::BeginBody()
 	if( m_Connection.m_ResponseBeginCB )
 		(m_Connection.m_ResponseBeginCB)( this, m_Connection.m_UserData );
 
-/*
-	printf("---------BeginBody()--------\n");
-	printf("Length: %d\n", m_Length );
-	printf("WillClose: %d\n", (int)m_WillClose );
-	printf("Chunked: %d\n", (int)m_Chunked );
-	printf("ChunkLeft: %d\n", (int)m_ChunkLeft );
-	printf("----------------------------\n");
-*/
 	// now start reading body data!
 	if( m_Chunked )
 		m_State = CHUNKLEN;

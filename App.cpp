@@ -31,7 +31,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <SDL/SDL.h>
-
+#include <stdexcept>
 
 class App : private Container
 {
@@ -133,7 +133,6 @@ private:
     configureScreenTransform( width, height );
     Scene scene( true );
     if ( scene.load( file ) ) {
-      printf("generating bmp %s\n", file);
       Canvas temp( width, height );
       scene.draw( temp, FULLSCREEN_RECT );
       std::string bmp( file );
@@ -195,7 +194,6 @@ private:
     if (isDirty()) {
       
       Rect area = dirtyArea();
-      //fprintf(stderr,"render %d,%d-%d,%d!\n",area.tl.x,area.tl.y,area.br.x,area.br.y);
       m_window->setClip(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
       draw(*m_window, area);
 
@@ -242,14 +240,11 @@ private:
       m_quit = true;
       return true;
     case SDL_ACTIVEEVENT:
-      printf("active: %d\n",ev.active.gain);
       if (ev.active.gain == 0) {
 	waitActive();
       }
       break;
     case SDL_MOUSEBUTTONDOWN:
-      if (ev.button.x < 10) 
-	printf("clicky: %d,%d\n",ev.button.x,ev.button.y);
       break;
     case SDL_KEYDOWN:
       switch ( ev.key.keysym.sym ) {
@@ -265,7 +260,6 @@ private:
 	m_quit = true;
 	return true;
       case SDLK_3:
-	fprintf(stderr,"UI: %s\n",toString().c_str());
 	return true;
       default:
 	break;
@@ -319,14 +313,12 @@ private:
 
       if ( sleepMs > 1 && m_renderRate < MAX_RENDER_RATE ) {
 	m_renderRate++;
-	//printf("increasing render rate to %dfps\n",m_renderRate);
 	sleepMs = lastTick + 1000/m_renderRate -  SDL_GetTicks();
       }
 
       if ( sleepMs > 0 ) {
 	SDL_Delay( sleepMs );
       } else {
-	//printf("overrun %dms\n",-sleepMs);
 	if ( m_renderRate > MIN_RENDER_RATE ) {
 	  m_renderRate--;
 	  //printf("decreasing render rate to %dfps\n",m_renderRate);
@@ -369,6 +361,8 @@ int npmain(int argc, char** argv)
     app.run();
   } catch ( const char* e ) {
     fprintf(stderr,"*** CAUGHT: %s",e);
+  } catch ( const std::exception& e ) {
+    fprintf(stderr,"*** CAUGHT: %s",e.what());
   } 
   return 0;
 }

@@ -18,12 +18,12 @@
 #include "Scene.h"
 #include <sstream>
 #include <cstdio>
+#include <stdexcept>
 
 
 ScriptEntry::ScriptEntry( const std::string& str )
 {
   char opc;
-  printf("log: %s\n",str.c_str());
   if ( sscanf(str.c_str(), "%d,%c,%d,%d,%d,%d,%d",
 	      &t, &opc, &stroke, &arg1, &arg2, &pt.x, &pt.y)==7 ) {
     switch (opc) {
@@ -35,10 +35,10 @@ ScriptEntry::ScriptEntry( const std::string& str )
     case 'p': op = OP_PAUSE; break;
     case 'g': op = OP_GOAL; break;
     default:
-      fprintf(stderr,"bad script op\n");
+      throw std::invalid_argument("bad script op");
     }
   } else {
-    fprintf(stderr,"badly formed script entry\n");
+    throw std::invalid_argument("badly formed script entry");
   }
 }
 
@@ -160,7 +160,6 @@ void ScriptPlayer::start( const ScriptLog* log, Scene* scene )
   m_index = 0;
   m_lastTick = 0;
   m_scene = scene;
-  printf("start playback: %d events\n",m_log->size());
 }
 
 

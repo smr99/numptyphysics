@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <string.h>
+#include <stdexcept>
 
 #include "Http.h"
 #include "happyhttp.h"
@@ -31,7 +32,6 @@ static void http_begin_cb( const Response* r, void* userdata )
     ((Http*)userdata)->m_size = 0;
     break;
   default:
-    //fprintf(stderr,"http status=%d %s\n",r->getstatus(),r->getreason());
     ((Http*)userdata)->m_err = r->getreason();
     ((Http*)userdata)->m_size = -1;
     break;
@@ -48,7 +48,6 @@ static void http_get_cb( const Response* r, void* userdata,
 static void http_post_cb( const Response* r, void* userdata,
 			  const unsigned char* data, int numbytes )
 {
-  //printf("received %d bytes [%s]\n",numbytes,data);
 }
 
 static void http_complete_cb( const Response* r, void* userdata )
@@ -83,8 +82,6 @@ static bool parseUri( const char * uri,
     *outPort=atoi(e+1);
   }
   strcpy( outPath, strchr(uri,'/') );
-  //fprintf(stderr,"Http::get host=%s port=%d file=%s\n",
-  //        outHost,*outPort,outPath);
   return true;
 }
 
@@ -105,11 +102,10 @@ bool Http::get( const char* uri,
       con.setcallbacks( http_begin_cb, http_get_cb, http_complete_cb, this );
       con.request("GET",path,NULL,NULL,0);
       while ( con.outstanding() ) {
-	//fprintf(stderr,"http_get pump\n");
 	con.pump();
       }
     } catch ( Wobbly w ) {
-      fprintf(stderr,"http_get wobbly: %s\n",w.what());
+      throw std::runtime_error(w.what());
     }
   }
 
@@ -167,12 +163,10 @@ bool Http::post( const char* uri, const char*putname, const char* putfile,
       con.setcallbacks( http_begin_cb, http_post_cb, http_complete_cb, this );
       con.request("POST",path,headers,(unsigned char*)data,m_size);
       while ( con.outstanding() ) {
-	//fprintf(stderr,"http::post pump\n");
 	con.pump();
       }
     } catch ( Wobbly w ) {
-      fprintf(stderr,"http_get wobbly: %s\n",w.what());
-      return false;
+	throw std::runtime_error(w.what());
     }
   }
   return true;

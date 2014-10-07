@@ -138,7 +138,6 @@ public:
       m_levels->addPath( p.c_str() );
       int l = m_levels->findLevel( p.c_str() );
       if ( l >= 0 ) {
-	fprintf(stderr,"setting level to saved index to %d\n", l);
 	m_level = l;
 	//m_window.setSubName( p.c_str() );
       }
@@ -157,7 +156,6 @@ public:
 		   "data", SEND_TEMP_FILE, "type=1" ) ) {
 	std::string id = h.getHeader("NP-Upload-Id");
 	if ( id.length() > 0 ) {
-	  printf("uploaded as id %s\n",id.c_str());
 	  if ( !m_os->openBrowser((Config::planetRoot()+"/editlevel?id="+id).c_str()) ) {
 	    showMessage("Unable to launch browser");
 	  }
@@ -177,18 +175,13 @@ public:
     if (path != "") {
       OS->ensurePath(path);
       path = m_levels->demoName(m_level);
-      fprintf(stderr,"saving demo of level %d to %s\n",
-              m_level, path.c_str());
       m_scene.save(path, true);
-    } else {
-      fprintf(stderr,"not saving demo of demo\n");
-    }
+    } 
   }
 
   void clickMode(int cm)
   {
     if (cm != m_clickMode) {
-      fprintf(stderr,"clickMode=%d!\n",cm);
       m_clickMode = cm;
       switch (cm) {
       case 1: setEventMap(Os::get()->getEventMap(GAME_MOVE_MAP)); break;
@@ -210,7 +203,6 @@ public:
 
   void showMessage( const std::string& msg )
   {
-    printf("showMessage \"%s\"\n",msg.c_str());
     add( new MessageBox(msg) );
   }
 
@@ -329,10 +321,6 @@ public:
 	  //don't overwrite time after replay
 	  m_stats.endTime = SDL_GetTicks();
 	}
-	fprintf(stderr,"STATS:\ttime=%dms\n\t"
-		"strokes=%d (%d paused, %d undone)\n",
-		m_stats.endTime-m_stats.startTime, m_stats.strokeCount,
-		m_stats.pausedStrokes, m_stats.undoCount);
 	m_completedDialog = createNextLevelDialog(this);
 	add( m_completedDialog );
 	saveDemo();
@@ -405,7 +393,6 @@ public:
       add( createMainMenu(this) );
       break;
     case Event::PAUSE:
-      fprintf(stderr,"Game pause!\n");
       togglePause();
       break;
     case Event::UNDO:
@@ -448,7 +435,6 @@ public:
 	  add( createColourDialog(this, NUM_BRUSHES, brushColours) ); 
 	  break;
 	default:
-	  fprintf(stderr,"SetTool %d\n",ev.y);
 	  setTool(ev.y);
 	  break;
 	}
@@ -526,7 +512,6 @@ public:
       }
       break;
     case Event::MOVEBEGIN:
-      fprintf(stderr,"MOVING!\n");
       if ( !m_replaying && !m_moveStroke ) {
 	m_moveStroke = m_scene.strokeAtPoint( mousePoint(ev),
 					      SELECT_TOLERANCE );
@@ -534,7 +519,6 @@ public:
       break;
     case Event::MOVEMORE:
       if ( m_moveStroke ) {
-	fprintf(stderr,"MOVING MORE!\n");
 	m_scene.moveStroke( m_moveStroke, mousePoint(ev) );
       }
       break;
@@ -542,7 +526,6 @@ public:
       m_moveStroke = NULL;
       break;
     case Event::DELETE:
-      fprintf(stderr,"DELETEING!\n");
       m_scene.deleteStroke( m_scene.strokeAtPoint( mousePoint(ev),
 						   SELECT_TOLERANCE ) );
       m_refresh = true;

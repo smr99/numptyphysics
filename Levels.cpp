@@ -108,8 +108,6 @@ bool Levels::addPath( const char* path )
 	}
       }
       closedir( dir );
-    } else {
-      //printf("bogus level path %s\n",path);
     }
   }
   return true;
@@ -131,18 +129,14 @@ bool Levels::addLevel( Collection* collection,
   for ( int i=0; i<collection->levels.size(); i++ ) {
     if ( collection->levels[i]->file == file
 	 && collection->levels[i]->index == index ) {
-      //printf("addLevel %s already present!\n",file.c_str());
       return false;
     } else if ( collection->levels[i]->rank > rank ) {
-      //printf("insert level %s+%d at %d\n",file.c_str(),index,i);
       collection->levels.insert(i,e);
       m_numLevels++;
       return true;
     }
   }
   collection->levels.append( e );
-  //printf("add level %s+%d as %s[%d]\n",file.c_str(),index,
-  // collection->file.c_str(), collection->levels.size());
   m_numLevels++;
   return true;
 }
@@ -156,7 +150,6 @@ Levels::Collection* Levels::getCollection( const std::string& file )
     }
   }
   Collection *c = new Collection();
-  //fprintf(stderr,"New Collection %s\n",file.c_str());
   c->file = file;
   c->name = file;
   c->rank = rankFromPath(file);
@@ -173,16 +166,11 @@ Levels::Collection* Levels::getCollection( const std::string& file )
 
 bool Levels::scanCollection( const std::string& file, int rank )
 {
-  try {
     ZipFile zf(file);
     Collection *collection = getCollection(file);
-    //printf("found collection %s with %d levels\n",file.c_str(),zf.numEntries());
     for ( int i=0; i<zf.numEntries(); i++ ) {
       addLevel( collection, file, rankFromPath(zf.entryName(i),rank), i );
     }
-  } catch (...) {
-    fprintf(stderr,"invalid collection %s\n",file.c_str());
-  }
   return false;
 }
 
@@ -338,7 +326,6 @@ Levels::LevelDesc* Levels::findLevel( int i )
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {
       if ( i >= m_collections[c]->levels.size() ) {
-	//fprintf(stderr,"index %d not in c%d (size=%d)\n",i,c,m_collections[c]->levels.size());
 	i -= m_collections[c]->levels.size();
       } else {
 	return m_collections[c]->levels[i];

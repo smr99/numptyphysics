@@ -167,7 +167,6 @@ public:
     m_scroll->add(vbox,0,0);
 
     for (int i=0; i<THUMB_COUNT && i+m_dispbase<m_dispcount; i++) {
-      fprintf(stderr,"creating thumb\n");
       Canvas temp( SCREEN_WIDTH, SCREEN_HEIGHT );
       Scene scene( true );
       unsigned char buf[64*1024];
@@ -298,7 +297,6 @@ public:
       }
       return true;
     case Event::SELECT:
-      fprintf(stderr,"select level %d\n",ev.x);
       m_chosenLevel = ev.x;
       content()->empty();
       content()->add(new LevelLauncher(m_chosenLevel,NULL));
@@ -594,7 +592,6 @@ public:
   }
   Widget* makeButton( MenuItem* item, const Event& ev )
   {
-    fprintf(stderr,"IconDialog::makeButton %s\n",item->text.c_str());
     try {
       return new IconButton(item->text,item->text+".png",ev);
     } catch (...) {
