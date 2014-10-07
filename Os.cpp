@@ -147,23 +147,19 @@ EventMap* Os::getEventMap( EventMapType type )
 }
 
 
-bool Os::ensurePath(const std::string& path)
+bool Os::ensurePath(const std::string& dirPath)
 {
   struct stat st;
-  if ( stat(path.c_str(),&st)!=0 ) {
-    size_t sep = path.rfind(Os::pathSep);
-    if ( sep != std::string::npos && sep > 0 ) {
-      ensurePath(path.substr(0,sep));
-    }
-    if ( mkdir( path.c_str(), 0755)!=0 ) {
-      fprintf(stderr,"failed to create dir %s\n", path.c_str());
-      return false;
-    } else {
-      fprintf(stderr,"created dir %s\n", path.c_str());
-      return true;
-    }
-  } 
-  return true;
+  if ( stat(dirPath.c_str(),&st)==0 )
+    return true;
+  
+  size_t sep = dirPath.rfind(Os::pathSep);
+  if ( sep != std::string::npos && sep > 0 ) {
+      if (!ensurePath(dirPath.substr(0,sep)))
+	  return false;
+  }
+
+  return mkdir( dirPath.c_str(), 0755) == 0;
 }
 
 
@@ -172,3 +168,4 @@ bool Os::exists(const std::string& file)
   struct stat st;
   return stat(file.c_str(),&st)==0;
 }
+

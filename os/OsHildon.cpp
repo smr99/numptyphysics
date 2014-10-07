@@ -216,20 +216,6 @@ class OsHildon : public Os, private Accelerometer
     }
   }
 
-  virtual void decorateGame( WidgetParent* game )
-  {
-    Button *b;
-    // play options on the right
-    b = new Button("",Event(Event::OPTION,1));
-    b->setBg(0x408040);
-    game->add( b, Rect(SCREEN_WIDTH-10,0,
-SCREEN_WIDTH,SCREEN_HEIGHT) );
-    // palette/edit options on the left
-    b = new Button("",Event(Event::OPTION,2));
-    b->setBg(0x408040);
-    game->add( b, Rect(0,0,10,SCREEN_HEIGHT));
-  }
-
   virtual char *getLaunchFile() 
   {
     if ( m_numFiles > 0 ) {
@@ -249,26 +235,6 @@ SCREEN_WIDTH,SCREEN_HEIGHT) );
     }
     return false;
   }
-
-  virtual char* saveDialog( const char* path )
-  {
-#if 0
-    static char buf[256];
-    GtkWidget *dialog = hildon_file_chooser_dialog_new(NULL,GTK_FILE_CHOOSER_ACTION_SAVE);
-    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), path);
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
-      gchar *name;
-      name = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-      strncpy( buf, name, 256 );
-      g_print("Saving as %s\n", name);
-      g_free(name);
-    }    
-    return buf;    
-#else
-    return NULL;
-#endif
-  }
-
 };
 
 

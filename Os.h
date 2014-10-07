@@ -28,14 +28,56 @@ class Os
 {
  public:  
   virtual ~Os() {}
+  /**
+   * @brief A hook to poll the OS for events
+   * 
+   * Override this function in order to read OS-specific devices for input.
+   * Any such input should be translated into an SDL_Event using SDL_PushEvent().
+   * 
+   * @return void
+   */
   virtual void  poll() {};
+  /**
+   * @brief Enumeration function that returns the next launch file
+   * 
+   * This function is called repeatedly to enumerate a collection of launch files.
+   * Return NULL to indicate end of list.
+   * 
+   * @return char*
+   */
   virtual char* getLaunchFile() { return NULL; }
+  /**
+   * @brief Open web browser to display the given url
+   * 
+   * @param url ...
+   * @return true if open succeeds
+   */
   virtual bool  openBrowser( const char* url ) = 0;
-  virtual char* saveDialog( const char* path ) { return NULL; }
+  /**
+   * @brief Obtain Accelerometer, if available.
+   * 
+   * @return Accelerometer*, or NULL if no Accelerometer available.
+   */
   virtual Accelerometer*  getAccelerometer() { return NULL; }
   virtual EventMap* getEventMap( EventMapType type );
-  virtual void decorateGame( WidgetParent* game ) {}
-  bool ensurePath(const std::string& path);
+  
+  /**
+   * @brief Ensure the directory exists
+   * 
+   * This function attempts to create the named directory if it 
+   * initially does not exist.
+   * 
+   * @param dirPath path name of a directory
+   * @return true if the directory exists on exit
+   */
+  
+  bool ensurePath(const std::string& dirPath);
+  /**
+   * @brief Test for file existence
+   * 
+   * @param file path name of a file
+   * @return true if the file exists
+   */
   bool exists(const std::string& file);
   static Os* get();
   static const char pathSep;

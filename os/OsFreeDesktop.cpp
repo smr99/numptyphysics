@@ -38,9 +38,6 @@ class OsFreeDesktop : public Os
 {
  public:
   OsFreeDesktop()
-    : m_fifo(NULL),
-      m_cmdPos(0),
-      m_cmdReady(false)
   {
   }
 
@@ -55,67 +52,6 @@ class OsFreeDesktop : public Os
     }
     return false;
   }
-
-  virtual char* saveDialog( const char* path )
-  {
-    //TODO - gtk?
-    return NULL;
-  }
-
-  virtual void poll() 
-  {
-    if ( m_fifo && !m_cmdReady ) {
-      int c = 0;
-      while ( c != EOF ) {
-	c = fgetc( m_fifo );
-	m_cmdBuffer[m_cmdPos++] = c;
-	if ( c == 0 ) {
-	  m_cmdReady = false;
-	  break;
-	}
-      }
-    }
-  }
-
-  virtual char *getLaunchFile() 
-  {
-    poll();
-    if ( m_cmdReady ) {
-      m_cmdPos = 0;
-      m_cmdReady = false;
-      return m_cmdBuffer;
-    }
-    return NULL;
-  }
-
-  bool setupPipe( int argc, char** argv )
-  {
-    return true;
-    std::string fifoFile = Config::userDataDir()+Os::pathSep+".pipe";
-    FILE *fifo = fopen( fifoFile.c_str(), "w" );
-    if ( fifo ) {
-      for ( int i=1; i<argc; i++ ) {
-	fwrite( argv[i], 1, strlen(argv[i])+1, fifo );
-      }
-      fclose(fifo);
-      return false;
-    } else {
-      // Create the FIFO file
-      umask(0);
-      if (mknod( fifoFile.c_str(), S_IFIFO|0666, 0)) {
-	fprintf(stderr, "mknod() failed\n");
-      } else {
-	m_fifo = fopen( fifoFile.c_str(), "r");
-      }
-      return true;
-    }
-  }
-
-private:
-  FILE *m_fifo;
-  char m_cmdBuffer[128];
-  int  m_cmdPos;
-  bool m_cmdReady;
 };
 
 
@@ -127,11 +63,10 @@ Os* Os::get()
 
 const char Os::pathSep = '/';
 
+
 int main(int argc, char** argv)
 {
-  if ( ((OsFreeDesktop*)Os::get())->setupPipe(argc,argv) ) {
     npmain(argc,argv);
-  }
 }
 
 #endif
