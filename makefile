@@ -1,4 +1,5 @@
-CXXFLAGS = -g -O1 -Wall
+CXXFLAGS = -g -O0 -Wall -Wextra
+
 APP = numptyphysics
 
 DESTDIR ?=
@@ -40,7 +41,7 @@ Dialogs.cpp: help_text_html.h
 %_html.h: %.html
 	xxd -i $< $@
 
-$(APP): $(OBJECTS) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
+$(APP): $(OBJECTS)
 	$(CXX) -o $@ $^ $(LIBS)
 
 check: tester
@@ -52,14 +53,13 @@ gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
 gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
 	$(CXX) -c -I$(GTEST_DIR) -o $@ $^ $(LIBS) -lpthread
 	
-tester: $(OBJECTS_TEST) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY) gtest-all.o gtest_main.o
+tester: $(OBJECTS_TEST) gtest-all.o gtest_main.o
 	$(CXX) -o $@ $^ $(LIBS) -lpthread
 	
 clean:
 	rm -f $(OBJECTS) $(OBJECTS_TEST)
 	rm -f $(DEPENDENCIES)
 	rm -f help_text_html.h
-	$(MAKE) -C Box2D/Source clean
 
 distclean: clean
 	rm -f $(APP)

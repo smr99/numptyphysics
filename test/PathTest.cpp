@@ -20,6 +20,9 @@ std::ostream& operator<<(std::ostream& os, const Path& p)
 }
 
 
+using namespace std;
+
+
 TEST(Path, constructor_trivial)
 {
     Path p;
@@ -51,11 +54,20 @@ TEST(Path, translate)
     ASSERT_EQ(Vec2(4,-2), p[1]);
 }
 
-TEST(Path, rotate)
+TEST(Path, rotate_b2Mat22)
 {
     Path p("0,0 1,1");
     p.rotate(b2Mat22(0, -1, 1, 0));
     
     ASSERT_EQ(Vec2(0,0), p[0]);
     ASSERT_EQ(Vec2(-1,1), p[1]);
+}
+
+TEST(Path, rotate_b2Rot)
+{
+    Path p("0,0 100,0");
+    p.rotate(b2Rot(M_PI_2));
+    
+    ASSERT_EQ(Vec2(0,0), p[0]);
+    ASSERT_EQ(Vec2(0,100), p[1]);
 }

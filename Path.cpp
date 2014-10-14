@@ -15,6 +15,7 @@
  */
 
 #include <cstring>
+#include <cstdio>
 #include "Path.h"
 
 
@@ -82,14 +83,26 @@ Path& Path::translate(const Vec2& xlate)
 
 Path& Path::rotate(const b2Mat22& rot) 
 {
-  float32 j1 = rot.col1.x;
-  float32 k1 = rot.col1.y;
-  float32 j2 = rot.col2.x;
-  float32 k2 = rot.col2.y;
-  Vec2 v;
+  float32 j1 = rot.ex.x;
+  float32 k1 = rot.ex.y;
+  float32 j2 = rot.ey.x;
+  float32 k2 = rot.ey.y;
 
   for (int i=0;i<size();i++) {
-    //at(i) = b2Mul( rot, at(i) );
+    at(i) = Vec2( j1 * at(i).x + j2 * at(i).y,
+		  k1 * at(i).x + k2 * at(i).y );
+  }
+  return *this;
+}
+
+Path& Path::rotate(const b2Rot& rot) 
+{
+  float32 j1 = rot.c;
+  float32 k1 = rot.s;
+  float32 j2 = -rot.s;
+  float32 k2 = rot.c;
+
+  for (int i=0;i<size();i++) {
     at(i) = Vec2( j1 * at(i).x + j2 * at(i).y,
 		  k1 * at(i).x + k2 * at(i).y );
   }
