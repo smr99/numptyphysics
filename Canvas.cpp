@@ -20,20 +20,18 @@
 #include "Canvas.h"
 #include "Path.h"
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
 #define Window X11Window //oops
 #define Font X11Font //oops
 #include "Swipe.h"
-#include <SDL/SDL_syswm.h>
+#include <SDL_syswm.h>
 #ifndef WIN32
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #endif
 #undef Window
-
-//#define FORCE_16BPP
 
 // zoomer.cpp
 extern SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy);
@@ -222,17 +220,12 @@ Canvas::Canvas( int w, int h )
   switch (SDL_GetVideoInfo()->vfmt->BitsPerPixel) {
   case 16:
   case 32:
-#ifdef FORCE_16BPP
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 16,
-				    0xF100, 0x07e0, 0x001F, 0x0 );
-#else
     m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 
 				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
 				    SDL_GetVideoInfo()->vfmt->Rmask,
 				    SDL_GetVideoInfo()->vfmt->Gmask,
 				    SDL_GetVideoInfo()->vfmt->Bmask,
 				    SDL_GetVideoInfo()->vfmt->Amask );
-#endif
     break;
   default:
     // eg: dummy vid driver reports 8bpp
@@ -637,28 +630,20 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
     putenv(s);
   }
 #ifdef USE_HILDON
-#if 0
-  m_state = SDL_SetVideoMode( w, h, 16, SDL_SWSURFACE);//SDL_FULLSCREEN);
-  SDL_WM_ToggleFullScreen( SURFACE(this) );
-#else //n900
   m_state = SDL_SetVideoMode( w, h, 0, SDL_SWSURFACE|SDL_FULLSCREEN);
-#endif
   SDL_ShowCursor( SDL_DISABLE );
 #else
-# ifdef FORCE_16BPP
-  m_state = SDL_SetVideoMode( w, h, 16, SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
-# else
-  m_state = SDL_SetVideoMode( w, h, 32, SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
-# endif
+  m_state = SDL_CreateWindow(title, 
+			     SDL_WINDOWPOS_UNDEFINED,
+			     SDL_WINDOWPOS_UNDEFINED,
+			     w, h,
+			     SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
+
 #endif
   if ( SURFACE(this) == NULL ) {
     throw "Unable to set video mode";
   }
   resetClip();
-
-  if ( title ) {
-    SDL_WM_SetCaption( title, title );
-  }
 
   memset(&(Swipe::m_syswminfo), 0, sizeof(SDL_SysWMinfo));
   SDL_VERSION(&(Swipe::m_syswminfo.version));
@@ -686,19 +671,7 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
 	      sys.info.x11.fswindow,
 	      title );
 		  
-#if 0
-  /* Fremantle: tell maemo-status-volume daemon to ungrab keys */
-  unsigned long val = 1; /* ungrab, use 0 to grab */
-  XChangeProperty( sys.info.x11.display,
-		   sys.info.x11.wmwindow,
-		   XInternAtom(sys.info.x11.display,
-			       "_HILDON_ZOOM_KEY_ATOM", False),
-		   XA_INTEGER, 32,
-		   PropModeReplace,
-		   (unsigned char*)&val, 1);
-#endif //0
-
-  
+ 
 #endif
 }
 

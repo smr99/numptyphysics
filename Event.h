@@ -16,7 +16,7 @@
 
 #ifndef EVENT_H
 #define EVENT_H
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 // custom SDL User Event code
 const int WORKER_DONE = 1;

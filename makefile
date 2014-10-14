@@ -1,4 +1,4 @@
-CXXFLAGS = -O2 -Wall
+CXXFLAGS = -g -Wall
 APP = numptyphysics
 
 DESTDIR ?=
@@ -11,7 +11,7 @@ SOURCES = $(wildcard *.cpp)
 all: $(APP)
 
 # Required modules (uses pkg-config)
-PKGS = sdl SDL_image x11
+PKGS = sdl2 SDL2_image x11
 
 CXXFLAGS += $(shell pkg-config --cflags $(PKGS))
 LIBS += $(shell pkg-config --libs $(PKGS))
