@@ -1,4 +1,4 @@
-CXXFLAGS = -O2 -Wall
+CXXFLAGS = -g -O1 -Wall
 APP = numptyphysics
 
 DESTDIR ?=
@@ -11,24 +11,13 @@ SOURCES = $(wildcard *.cpp)
 all: $(APP)
 
 # Required modules (uses pkg-config)
-PKGS = sdl SDL_image x11
+PKGS = box2d sdl SDL_image x11
 
 CXXFLAGS += $(shell pkg-config --cflags $(PKGS))
 LIBS += $(shell pkg-config --libs $(PKGS))
 
 # No pkg-config module for SDL_ttf and zlib (on some systems)
 LIBS += -lSDL_ttf -lz
-
-
-# Box2D Library
-CXXFLAGS += -IBox2D/Include
-BOX2D_SOURCE := Box2D/Source
-BOX2D_LIBRARY := Gen/float/libbox2d.a
-LIBS += $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
-
-$(BOX2D_SOURCE)/$(BOX2D_LIBRARY):
-	$(MAKE) -C $(BOX2D_SOURCE) $(BOX2D_LIBRARY)
-
 
 # Pick the right OS-specific module here
 SOURCES += os/OsFreeDesktop.cpp
