@@ -43,7 +43,7 @@ CXXFLAGS += -MD
 -include $(DEPENDENCIES)
 
 OBJECTS = $(SOURCES:.cpp=.o)
-OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o)
+OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o) Path.o
 
 Dialogs.cpp: help_text_html.h
 
