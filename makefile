@@ -7,6 +7,7 @@ PREFIX = /opt/numptyphysics
 CXXFLAGS += -DINSTALL_BASE_PATH=\"$(PREFIX)/data\"
 
 SOURCES = $(wildcard *.cpp)
+SOURCES_TEST = $(wildcard test/*.cpp)
 
 all: $(APP)
 
@@ -29,17 +30,20 @@ LIBS += $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
 $(BOX2D_SOURCE)/$(BOX2D_LIBRARY):
 	$(MAKE) -C $(BOX2D_SOURCE) $(BOX2D_LIBRARY)
 
-
+	
+GTEST_DIR = /usr/src/gtest
+	
 # Pick the right OS-specific module here
 SOURCES += os/OsFreeDesktop.cpp
 CXXFLAGS += -I.
 
 # Dependency tracking
-DEPENDENCIES = $(SOURCES:.cpp=.d)
+DEPENDENCIES = $(SOURCES:.cpp=.d) $(SOURCES_TEST:.cpp=.d)
 CXXFLAGS += -MD
 -include $(DEPENDENCIES)
 
 OBJECTS = $(SOURCES:.cpp=.o)
+OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o)
 
 Dialogs.cpp: help_text_html.h
 
@@ -49,9 +53,20 @@ Dialogs.cpp: help_text_html.h
 $(APP): $(OBJECTS) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
 	$(CXX) -o $@ $^ $(LIBS)
 
+check: tester
+	./tester
 
+gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
+	$(CXX) -c -I$(GTEST_DIR) -o $@ $^ $(LIBS) -lpthread
+	
+gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
+	$(CXX) -c -I$(GTEST_DIR) -o $@ $^ $(LIBS) -lpthread
+	
+tester: $(OBJECTS_TEST) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY) gtest-all.o gtest_main.o
+	$(CXX) -o $@ $^ $(LIBS) -lpthread
+	
 clean:
-	rm -f $(OBJECTS)
+	rm -f $(OBJECTS) $(OBJECTS_TEST)
 	rm -f $(DEPENDENCIES)
 	rm -f help_text_html.h
 	$(MAKE) -C Box2D/Source clean
