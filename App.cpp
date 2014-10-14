@@ -321,7 +321,6 @@ private:
       } else {
 	if ( m_renderRate > MIN_RENDER_RATE ) {
 	  m_renderRate--;
-	  //printf("decreasing render rate to %dfps\n",m_renderRate);
 	} else if ( iterationRate > 30 ) {
 	  //slow down simulation time to maintain fps??
 	}
