@@ -18,6 +18,8 @@
 #define CANVAS_H
 
 #include "Common.h"
+#include <string>
+
 class Path;
 
 class Canvas

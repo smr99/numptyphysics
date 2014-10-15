@@ -34,7 +34,7 @@ $(BOX2D_SOURCE)/$(BOX2D_LIBRARY):
 GTEST_DIR = /usr/src/gtest
 	
 # Pick the right OS-specific module here
-SOURCES += os/OsFreeDesktop.cpp
+SOURCES_OS = os/OsFreeDesktop.cpp
 CXXFLAGS += -I.
 
 # Dependency tracking
@@ -43,14 +43,16 @@ CXXFLAGS += -MD
 -include $(DEPENDENCIES)
 
 OBJECTS = $(SOURCES:.cpp=.o)
-OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o) Path.o
+OBJECTS_OS = $(SOURCES_OS:.cpp=.o)
+OBJECTS_OS_TEST = $(subst os,test,$(OBJECTS_OS))
+OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o) $(OBJECTS) $(OBJECTS_OS_TEST)
 
 Dialogs.cpp: help_text_html.h
 
 %_html.h: %.html
 	xxd -i $< $@
 
-$(APP): $(OBJECTS) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
+$(APP): $(OBJECTS) $(OBJECTS_OS) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
 	$(CXX) -o $@ $^ $(LIBS)
 
 check: tester
@@ -61,12 +63,15 @@ gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
 	
 gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
 	$(CXX) -c -I$(GTEST_DIR) -o $@ $^ $(LIBS) -lpthread
-	
+
+$(OBJECTS_OS_TEST): $(SOURCES_OS)
+	$(CXX) $(CXXFLAGS) -DTEST -c -o $@ $^
+
 tester: $(OBJECTS_TEST) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY) gtest-all.o gtest_main.o
 	$(CXX) -o $@ $^ $(LIBS) -lpthread
 	
 clean:
-	rm -f $(OBJECTS) $(OBJECTS_TEST)
+	rm -f $(OBJECTS) $(OBJECTS_OS) $(OBJECTS_TEST) $(OBJECTS_OS_TEST)
 	rm -f $(DEPENDENCIES)
 	rm -f help_text_html.h
 	$(MAKE) -C Box2D/Source clean
