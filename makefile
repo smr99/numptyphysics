@@ -1,4 +1,4 @@
-CXXFLAGS = -g -O0 -Wall -Wextra
+CXXFLAGS = -g -O2 -Wall 
 
 APP = numptyphysics
 
@@ -36,14 +36,14 @@ CXXFLAGS += -MD
 OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS_OS = $(SOURCES_OS:.cpp=.o)
 OBJECTS_OS_TEST = $(subst os,test,$(OBJECTS_OS))
-OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o) $(OBJECTS) $(OBJECTS_OS_TEST)
+OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o) $(OBJECTS) $(OBJECTS_OS_TEST) gtest-all.o gtest_main.o
 
 Dialogs.cpp: help_text_html.h
 
 %_html.h: %.html
 	xxd -i $< $@
 
-$(APP): $(OBJECTS) $(OBJECTS_OS) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
+$(APP): $(OBJECTS) $(OBJECTS_OS)
 	$(CXX) -o $@ $^ $(LIBS)
 
 check: tester
@@ -55,12 +55,10 @@ gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
 gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
 	$(CXX) -c -I$(GTEST_DIR) -o $@ $^ $(LIBS) -lpthread
 
-tester: $(OBJECTS_TEST) gtest-all.o gtest_main.o
-
 $(OBJECTS_OS_TEST): $(SOURCES_OS)
 	$(CXX) $(CXXFLAGS) -DTEST -c -o $@ $^
 
-tester: $(OBJECTS_TEST) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY) gtest-all.o gtest_main.o
+tester: $(OBJECTS_TEST)
 	$(CXX) -o $@ $^ $(LIBS) -lpthread
 	
 clean:
