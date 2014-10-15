@@ -1,23 +1,6 @@
 #include "Path.h"
 #include <gtest/gtest.h>
-#include <ostream>
-
-std::ostream& operator<<(std::ostream& os, const Vec2& v)
-{
-    return os << "Vec2(" << v.x << "," << v.y << ")";
-}
-
-
-std::ostream& operator<<(std::ostream& os, const Path& p)
-{
-    os << "Path(n=" << p.numPoints();
-    for(int i = 0; i < std::min(5, p.numPoints()); ++i)
-    {
-	os << ", " << p[i];
-    }
-    
-    return os << ")";
-}
+#include "TestCommon.h"
 
 
 using namespace std;

@@ -64,9 +64,11 @@ Os* Os::get()
 const char Os::pathSep = '/';
 
 
+#ifndef TEST
 int main(int argc, char** argv)
 {
     npmain(argc,argv);
 }
+#endif
 
 #endif
