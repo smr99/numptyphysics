@@ -67,7 +67,7 @@ clean:
 	rm -f help_text_html.h
 
 distclean: clean
-	rm -f $(APP)
+	rm -f $(APP) tester
 
 install: $(APP)
 	mkdir -p $(DESTDIR)/$(PREFIX)/bin
