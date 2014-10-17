@@ -83,7 +83,11 @@ inline Vec2 Max( const Vec2& a, const Vec2& b )
 
 /**
  * @brief Rectangle with integer coordinates
- * Mainly used for screen rectangles.  Width and Height 
+ * Mainly used for screen rectangles.  
+ * The Width and Height include boundary pixels; i.e. if left and right X values are the 
+ * same, the Width is 1.  Similar for Height.
+ * 
+ * Oddly, size() doesn't include the boundary pixels.
  */
 struct Rect {
   Rect() { clear(); }
@@ -96,8 +100,9 @@ struct Rect {
   // This is inconsistent in that size() != Vec2(width(), height())
   Vec2 size() const { return br-tl; }
 
-  void clear() { tl.x=tl.y=br.x=br.y=0; }
-  bool isEmpty() const { return tl.x==0 && br.x==0; }
+  void clear() { tl.x=tl.y=0; br.x=br.y=-1; }
+  
+  bool isEmpty() const { return tl.x > br.x || tl.y > br.y; }
   
   // If not empty, Expand by units on each of 4 sides
   void grow(int by) { 
@@ -106,7 +111,11 @@ struct Rect {
       br.x += by; br.y += by;
     }
   }
+  
+  // Expand this rectangle, if necessary, to include point v
   void expand( const Vec2& v ) { tl=Min(tl,v); br=Max(br,v); }
+
+  // Expand this rectangle, if necessary, to include rectangle r
   void expand( const Rect& r ) { 
     if (isEmpty()) {
       *this = r;
@@ -115,26 +124,31 @@ struct Rect {
       expand(r.br); 
     }
   }
+  
+  /// Clip this rectangle to rectangle r
+  /// If rectangles do not intersect, the result is an empty rectangle
   void clipTo( const Rect& r ) { tl=Max(tl,r.tl); br=Min(br,r.br); }
+  
+  /// @return true if this rectangle contains point p
   bool contains( const Vec2& p ) const {
     return p.x >= tl.x && p.x <= br.x && p.y >= tl.y && p.y <= br.y;
   }
+  
+  /// @return true if this rectangle contains rectangle p
   bool contains( const Rect& p ) const {
     return contains(p.tl) && contains(p.br);
   }
+  
+  /// @return true if this rectangle intersects rectangle r
   bool intersects( const Rect& r ) const {
     return r.tl.x <= br.x
       && r.tl.y <= br.y
       && r.br.x >= tl.x 
       && r.br.y >= tl.y;
   }
+
   Vec2 centroid() const { return (tl+br)/2; }
-  Rect operator+( const Vec2& b ) const {
-    Rect r=*this;
-    r.tl += b; r.br += b;
-    return r;
-  }
-  
+
   // Top Left and Bottom Right corners.
   Vec2 tl, br;
 };
