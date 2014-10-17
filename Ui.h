@@ -42,7 +42,7 @@ class Widget
   virtual void sizeTo( const Vec2& size );
   virtual const Rect& position() const { return m_pos; }
   virtual bool isDirty() {return m_dirty;}
-  virtual Rect dirtyArea() {return m_dirty?m_pos:Rect(false);};
+  virtual Rect dirtyArea() {return m_dirty?m_pos:Rect();};
   virtual void onTick( int tick ) {}
   virtual void draw( Canvas& screen, const Rect& area );
   virtual bool processEvent( SDL_Event& ev );

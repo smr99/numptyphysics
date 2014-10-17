@@ -740,7 +740,7 @@ Rect Container::dirtyArea()
   if (m_dirty) {
     return m_pos;
   }
-  Rect r(false);
+  Rect r;
   for (int i=0; i<m_children.size(); ++i) {
     r.expand(m_children[i]->dirtyArea());
   }

@@ -81,15 +81,21 @@ inline Vec2 Max( const Vec2& a, const Vec2& b )
 #define Abs(a) ((a)<0?-(a):(a))
 
 
-
+/**
+ * @brief Rectangle with integer coordinates
+ * Mainly used for screen rectangles.  Width and Height 
+ */
 struct Rect {
-  Rect() {}
-  Rect(bool) { clear(); }
+  Rect() { clear(); }
   Rect( const Vec2& atl, const Vec2& abr ) : tl(atl), br(abr) {} 
   Rect( int x1, int y1, int x2, int y2 ) : tl(x1,y1), br(x2,y2) {}
-  int width() const { return br.x-tl.x+1;  }
-  int height() const { return br.y-tl.y+1;  }
+  
+  int width() const { return br.x - tl.x + 1;  }
+  int height() const { return br.y - tl.y + 1;  }
+  
+  // This is inconsistent in that size() != Vec2(width(), height())
   Vec2 size() const { return br-tl; }
+
   void clear() { tl.x=tl.y=br.x=br.y=0; }
   bool isEmpty() const { return tl.x==0 && br.x==0; }
   
@@ -128,6 +134,8 @@ struct Rect {
     r.tl += b; r.br += b;
     return r;
   }
+  
+  // Top Left and Bottom Right corners.
   Vec2 tl, br;
 };
 
