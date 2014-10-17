@@ -64,6 +64,7 @@ void Widget::sizeTo( const Vec2& size )
 {
   m_pos.br=m_pos.tl+size;  
   onResize();
+  dirty();
   if (m_parent) m_parent->dirty();
 }
 

@@ -37,18 +37,32 @@ class Widget
   virtual ~Widget() {}
   virtual const char* name() {return "Widget";}
   virtual std::string toString();
+  
+  /// Shift widget by offset "by"
   virtual void move( const Vec2& by );
+  
+  /// Position widget top-left corner to "to"
   virtual void moveTo( const Vec2& to ) {move(to-m_pos.tl);}
+
   virtual void sizeTo( const Vec2& size );
+  
+  /// @return bounding rectangle containing this widget
   virtual const Rect& position() const { return m_pos; }
   virtual bool isDirty() {return m_dirty;}
   virtual Rect dirtyArea() {return m_dirty?m_pos:Rect();};
   virtual void onTick( int tick ) {}
   virtual void draw( Canvas& screen, const Rect& area );
   virtual bool processEvent( SDL_Event& ev );
+  
+  /// @brief attempt to handle event
+  /// If event not handled by this Widget, recursively pass up the chain of parents
+  /// @return true if event was handled
   bool dispatchEvent( Event& ev );
 
   virtual void onResize() {}
+  
+  /// @brief ask widget to handle event
+  /// @return true if event was handled
   virtual bool onEvent( Event& ev ) {return false;}
 
   void setParent(WidgetParent* p) {m_parent = p;}
@@ -58,10 +72,7 @@ class Widget
   void setEventMap(EventMapType map);
 
   virtual void dirty(bool dirt=true) { m_dirty=dirt; }
-  virtual void dirty( const Rect& r ) {}
   
-  // Position appears to be the bounding rectangle for the widget.
-  Rect& position() { return m_pos; }
   void setBg(int bg) {m_bg=bg;}
   void setFg(int fg) {m_fg=fg;}
   void fitToParent(bool fit) { m_fitToParent=fit;}
@@ -70,11 +81,13 @@ class Widget
   void transparent(bool t) {m_alpha=t?0:255;}
   void alpha(int a) {m_alpha=a;}
   void border(bool drawBorder) {m_border = drawBorder?1:0;}
+  
  protected:
   Widget(WidgetParent *p=NULL);
+  
   WidgetParent* m_parent;
   EventMap*     m_eventMap;
-  Rect          m_pos;
+  Rect          m_pos;  // bounding rectangle for widget
   bool          m_dirty;
   bool          m_focussed;
   int           m_alpha;

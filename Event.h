@@ -79,6 +79,7 @@ struct Event
 };
 
 
+/// Map an SDL Event into a game Event
 struct EventMap
 {
   virtual Event process(const SDL_Event& ev)=0;
