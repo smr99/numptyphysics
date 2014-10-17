@@ -685,20 +685,6 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
   XStoreName( sys.info.x11.display,
 	      sys.info.x11.fswindow,
 	      title );
-		  
-#if 0
-  /* Fremantle: tell maemo-status-volume daemon to ungrab keys */
-  unsigned long val = 1; /* ungrab, use 0 to grab */
-  XChangeProperty( sys.info.x11.display,
-		   sys.info.x11.wmwindow,
-		   XInternAtom(sys.info.x11.display,
-			       "_HILDON_ZOOM_KEY_ATOM", False),
-		   XA_INTEGER, 32,
-		   PropModeReplace,
-		   (unsigned char*)&val, 1);
-#endif //0
-
-  
 #endif
 }
 
@@ -706,12 +692,12 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
 void Window::update( const Rect& r )
 {
   if ( r.tl.x < width() && r.tl.y < height() ) {
-    int x1 = Max( 0, r.tl.x );
-    int y1 = Max( 0, r.tl.y );
-    int x2 = Min( width()-1, r.br.x );
-    int y2 = Min( height()-1, r.br.y );
-    int w  = Max( 0, x2-x1 );
-    int h  = Max( 0, y2-y1 );
+    int x1 = std::max( 0, r.tl.x );
+    int y1 = std::max( 0, r.tl.y );
+    int x2 = std::min( width()-1, r.br.x );
+    int y2 = std::min( height()-1, r.br.y );
+    int w  = std::max( 0, x2-x1 );
+    int h  = std::max( 0, y2-y1 );
     if ( w > 0 && h > 0 ) {
       SDL_UpdateRect( SURFACE(this), x1, y1, w, h );
 #ifdef USE_HILDON

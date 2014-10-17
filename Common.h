@@ -26,48 +26,54 @@
 #define FLOAT32_TO_FIXED(float32) ((int)(float32*(float32)FIXED_ONE))
 #define FIXED_TO_INT(iNT) ((iNT)>>FIXED_SHIFT)
 
+
+/**
+ * @brief 2D integer vector
+ * Mainly used for screen positions.
+ */
 struct Vec2 {
   Vec2() {}
   Vec2( const Vec2& o ) : x(o.x), y(o.y) {}
   explicit Vec2( const b2Vec2& o ) : x((int)o.x), y((int)o.y) {}
   Vec2( int xx, int yy ) : x(xx), y(yy) {}
+  
   void operator+=( const Vec2& o ) { x+=o.x; y+=o.y; }
   void operator-=( const Vec2& o ) { x-=o.x; y-=o.y; }
-  Vec2 operator-() { return Vec2(-x,-y); }
   void operator*=( int o ) { x*=o; y*=o; }
+
+  Vec2 operator-() const { return Vec2(-x,-y); }
   bool operator==( const Vec2& o ) const { return x==o.x && y==o.y; }
   bool operator!=( const Vec2& o ) const { return !(*this==o); }
   operator b2Vec2() const { return b2Vec2((float32)x,(float32)y); } 
+  
   Vec2 operator+( const Vec2& b ) const { return Vec2(x+b.x,y+b.y); }
   Vec2 operator-( const Vec2& b ) const { return Vec2(x-b.x,y-b.y); }
   Vec2 operator/( int r ) const { return Vec2(x/r,y/r); }
   Vec2 operator*( int r ) const { return Vec2(x*r,y*r); }
+
   int x,y;
 };
 
-template <typename T> inline T Min( T a, T b )
-{
-  return a < b ? a : b;
-}
 
+/**
+ * @brief Return new vector (min(a.x, b.x), min(a.y, b.y)) 
+ */
 inline Vec2 Min( const Vec2& a, const Vec2& b )
 {
   Vec2 r;
-  r.x = Min(a.x,b.x);
-  r.y = Min(a.y,b.y);
+  r.x = std::min(a.x,b.x);
+  r.y = std::min(a.y,b.y);
   return r;
 }
 
-template <typename T> inline T Max( T a, T b )
-{
-  return a >= b ? a : b;
-}
-
+/**
+ * @brief Return new vector (max(a.x, b.x), max(a.y, b.y)) 
+ */
 inline Vec2 Max( const Vec2& a, const Vec2& b )
 {
   Vec2 r;
-  r.x = Max(a.x,b.x);
-  r.y = Max(a.y,b.y);
+  r.x = std::max(a.x,b.x);
+  r.y = std::max(a.y,b.y);
   return r;
 }
 
@@ -86,6 +92,8 @@ struct Rect {
   Vec2 size() const { return br-tl; }
   void clear() { tl.x=tl.y=br.x=br.y=0; }
   bool isEmpty() const { return tl.x==0 && br.x==0; }
+  
+  // If not empty, Expand by units on each of 4 sides
   void grow(int by) { 
     if (!isEmpty()) {
       tl.x -= by; tl.y -= by;

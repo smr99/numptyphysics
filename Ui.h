@@ -59,6 +59,8 @@ class Widget
 
   virtual void dirty(bool dirt=true) { m_dirty=dirt; }
   virtual void dirty( const Rect& r ) {}
+  
+  // Position appears to be the bounding rectangle for the widget.
   Rect& position() { return m_pos; }
   void setBg(int bg) {m_bg=bg;}
   void setFg(int fg) {m_fg=fg;}
