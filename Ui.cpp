@@ -660,18 +660,7 @@ void ScrollArea::draw( Canvas& screen, const Rect& area )
   if (cpos.br.y < m_pos.br.y && cpos.height() > m_pos.height()) {
     m_contents->moveTo(Vec2(cpos.tl.x,m_pos.br.y - cpos.size().y));
   }
-#if 1
   Container::draw(screen,area);
-#else
-  screen.drawRect(m_pos, screen.makeColour(0xff,0,0), true);
-  if (m_canvas) {
-    if (m_contents->isDirty()) {
-      Rect relArea = area - m_pos.tl;
-      m_contents->draw(*m_canvas, relArea);
-    }
-    screen.drawImage(m_canvas, m_pos.tl.x, m_pos.tl.y);
-  }
-#endif
 }
 
 void ScrollArea::add( Widget* w, int x, int y )
