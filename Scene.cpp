@@ -524,8 +524,7 @@ Scene::Scene( bool noWorld )
     m_protect( 0 ),
     m_gravity(0.0f, 0.0f),
     m_dynamicGravity(false),
-    m_accelerometer(Os::get()->getAccelerometer()),
-    m_dirtyArea(false)
+    m_accelerometer(Os::get()->getAccelerometer())
 {
   if ( !noWorld ) {
     resetWorld();
@@ -747,7 +746,7 @@ Rect Scene::dirtyArea()
 
 void Scene::calcDirtyArea()
 {
-  Rect r(false);
+  Rect r;
   for ( int i=0; i<m_strokes.size(); i++ ) {
     if ( m_strokes[i]->isDirty() ) {
       // acumulate new areas to draw

@@ -33,8 +33,6 @@
 #endif
 #undef Window
 
-//#define FORCE_16BPP
-
 // zoomer.cpp
 extern SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy);
 
@@ -222,17 +220,12 @@ Canvas::Canvas( int w, int h )
   switch (SDL_GetVideoInfo()->vfmt->BitsPerPixel) {
   case 16:
   case 32:
-#ifdef FORCE_16BPP
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 16,
-				    0xF100, 0x07e0, 0x001F, 0x0 );
-#else
     m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 
 				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
 				    SDL_GetVideoInfo()->vfmt->Rmask,
 				    SDL_GetVideoInfo()->vfmt->Gmask,
 				    SDL_GetVideoInfo()->vfmt->Bmask,
 				    SDL_GetVideoInfo()->vfmt->Amask );
-#endif
     break;
   default:
     // eg: dummy vid driver reports 8bpp
@@ -346,21 +339,6 @@ void Canvas::fade( const Rect& rr )
   }
   SDL_UnlockSurface(SURFACE(this));
 }
-
-#if 0
-inline uint32 avg2Pixels565(uint32 a, uint32 b)
-{
-  return (((a^b)&0xf7def7de)>>1) + (a&b);
-}
-
-inline uint16 avgPixels565(uint32 ab)
-{
-  uint16 a = ab >> 16;
-  uint16 v = ab & 0xffff;
-  
-  return (((a^b)&0xf7def7de)>>1) + (a&b);
-}
-#endif
 
 
 Canvas* Canvas::scale( int factor ) const
@@ -637,19 +615,10 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
     putenv(s);
   }
 #ifdef USE_HILDON
-#if 0
-  m_state = SDL_SetVideoMode( w, h, 16, SDL_SWSURFACE);//SDL_FULLSCREEN);
-  SDL_WM_ToggleFullScreen( SURFACE(this) );
-#else //n900
   m_state = SDL_SetVideoMode( w, h, 0, SDL_SWSURFACE|SDL_FULLSCREEN);
-#endif
   SDL_ShowCursor( SDL_DISABLE );
 #else
-# ifdef FORCE_16BPP
-  m_state = SDL_SetVideoMode( w, h, 16, SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
-# else
   m_state = SDL_SetVideoMode( w, h, 32, SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
-# endif
 #endif
   if ( SURFACE(this) == NULL ) {
     throw "Unable to set video mode";
@@ -685,20 +654,6 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
   XStoreName( sys.info.x11.display,
 	      sys.info.x11.fswindow,
 	      title );
-		  
-#if 0
-  /* Fremantle: tell maemo-status-volume daemon to ungrab keys */
-  unsigned long val = 1; /* ungrab, use 0 to grab */
-  XChangeProperty( sys.info.x11.display,
-		   sys.info.x11.wmwindow,
-		   XInternAtom(sys.info.x11.display,
-			       "_HILDON_ZOOM_KEY_ATOM", False),
-		   XA_INTEGER, 32,
-		   PropModeReplace,
-		   (unsigned char*)&val, 1);
-#endif //0
-
-  
 #endif
 }
 
@@ -706,12 +661,12 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
 void Window::update( const Rect& r )
 {
   if ( r.tl.x < width() && r.tl.y < height() ) {
-    int x1 = Max( 0, r.tl.x );
-    int y1 = Max( 0, r.tl.y );
-    int x2 = Min( width()-1, r.br.x );
-    int y2 = Min( height()-1, r.br.y );
-    int w  = Max( 0, x2-x1 );
-    int h  = Max( 0, y2-y1 );
+    int x1 = std::max( 0, r.tl.x );
+    int y1 = std::max( 0, r.tl.y );
+    int x2 = std::min( width()-1, r.br.x );
+    int y2 = std::min( height()-1, r.br.y );
+    int w  = std::max( 0, x2-x1 );
+    int h  = std::max( 0, y2-y1 );
     if ( w > 0 && h > 0 ) {
       SDL_UpdateRect( SURFACE(this), x1, y1, w, h );
 #ifdef USE_HILDON
