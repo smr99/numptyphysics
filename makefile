@@ -2,9 +2,19 @@ CXXFLAGS = -O2 -Wall
 APP = numptyphysics
 
 DESTDIR ?=
-PREFIX = /opt/numptyphysics
+PREFIX = /usr
 
-CXXFLAGS += -DINSTALL_BASE_PATH=\"$(PREFIX)/data\"
+# Standard directories
+BINDIR = $(PREFIX)/bin
+DATAROOTDIR = $(PREFIX)/share
+DESKTOPDIR = $(DATAROOTDIR)/applications
+MANDIR = $(DATAROOTDIR)/man
+
+# App-specific directories
+DATADIR = $(DATAROOTDIR)/$(APP)
+
+
+CXXFLAGS += -DINSTALL_BASE_PATH=\"$(DATADIR)\"
 
 SOURCES = $(wildcard *.cpp)
 
@@ -60,12 +70,12 @@ distclean: clean
 	rm -f $(APP)
 
 install: $(APP)
-	mkdir -p $(DESTDIR)/$(PREFIX)/bin
-	install -m 755 $(APP) $(DESTDIR)/$(PREFIX)/bin/
-	mkdir -p $(DESTDIR)/usr/share/applications
-	install -m 644 $(APP).desktop $(DESTDIR)/usr/share/applications/
-	mkdir -p $(DESTDIR)/$(PREFIX)/data
-	cp -rpv data/*.png data/*.ttf data/*.npz $(DESTDIR)/$(PREFIX)/data/
+	mkdir -p $(DESTDIR)$(BINDIR)
+	install -m 755 $(APP) $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(DESKTOPDIR)
+	install -m 644 $(APP).desktop $(DESTDIR)$(DESKTOPDIR)
+	mkdir -p $(DESTDIR)$(DATADIR)
+	cp -rpv data/*.png data/*.ttf data/*.npz $(DESTDIR)$(DATADIR)
 
 
 .PHONY: all clean distclean
