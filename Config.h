@@ -21,7 +21,7 @@
 #include "Common.h"
 #include "Os.h"
 
-#define PROJECT_HOMEPAGE "http://github.com/harmattan/numptyphysics"
+#define PROJECT_HOMEPAGE "http://numptyphysics.garage.maemo.org/"
 
 #define WORLD_WIDTH  800
 #define WORLD_HEIGHT 480
