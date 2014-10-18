@@ -18,6 +18,7 @@
 #include "Config.h"
 #include "Scene.h"
 #include "Accelerometer.h"
+#include <Dynamics/b2Body.h>
 
 #include <sstream>
 #include <fstream>
@@ -34,13 +35,13 @@ void Transform::set( float32 scale, float32 rotation, const Vec2& translation )
   if ( scale==0.0f && rotation==0.0f && translation==Vec2(0,0) ) {
     m_bypass = true;
   } else {
-    m_rot.Set( rotation );
+    float32 c = cosf(rotation), s = sinf(rotation);
     m_pos = translation;
-    m_rot.col1.x *= scale;
-    m_rot.col1.y *= scale;
-    m_rot.col2.x *= scale;
-    m_rot.col2.y *= scale;
-    m_invrot = m_rot.Invert();
+    m_rot.ex.x = c * scale;
+    m_rot.ex.y = s * scale;
+    m_rot.ey.x = -s * scale;
+    m_rot.ey.y = c * scale;
+    m_invrot = m_rot.GetInverse();
     m_bypass = false;
   }
 }
@@ -98,7 +99,7 @@ private:
     }
   };
 
-  struct BoxDef : public b2PolygonDef
+  struct BoxDef : public b2PolygonShape
   {
     void init( const Vec2& p1, const Vec2& p2, int attr )
     {
@@ -243,22 +244,25 @@ public:
     int n = m_shapePath.numPoints();
     if ( n > 1 ) {
       b2BodyDef bodyDef;
+      //bodyDef.type = ???
       bodyDef.position = m_origin;
       bodyDef.position *= 1.0f/PIXELS_PER_METREf;
       bodyDef.userData = this;
       if ( m_attributes & ATTRIB_SLEEPING ) {
-	bodyDef.isSleeping = true;
-      }
+	bodyDef.allowSleep = true;
+	bodyDef.awake = false;
+      } else {
+	bodyDef.allowSleep = false;
+	bodyDef.awake = true;
+      }	  
       m_body = world.CreateBody( &bodyDef );
       for ( int i=1; i<n; i++ ) {
 	BoxDef boxDef;
 	boxDef.init( m_shapePath.point(i-1),
 		     m_shapePath.point(i),
 		     m_attributes );
-	m_body->CreateShape( &boxDef );
+	m_body->CreateFixture( &boxDef );
       }
-      m_body->SetMassFromShapes();
-
     }
     transform();
   }
@@ -367,7 +371,7 @@ public:
     if ( m_body ) {
       b2Vec2 pw = p;
       pw *= 1.0f/PIXELS_PER_METREf;
-      m_body->SetXForm( pw, m_body->GetAngle() );
+      m_body->SetTransform( pw, m_body->GetAngle() );
     }
     m_origin = p;
     m_drawn = false;
@@ -417,7 +421,7 @@ public:
       
       if (m_body) {
 	// stash the body where no-one will find it
-	m_body->SetXForm( b2Vec2(0.0f,SCREEN_HEIGHT*2.0f), 0.0f );
+	m_body->SetTransform( b2Vec2(0.0f,SCREEN_HEIGHT*2.0f), 0.0f );
 	m_body->SetLinearVelocity( b2Vec2(0.0f,0.0f) );
 	m_body->SetAngularVelocity( 0.0f );
       }
@@ -478,7 +482,7 @@ private:
 	return false; // ground strokes never move.
       } else if ( m_xformAngle != m_body->GetAngle() 
 	   ||  ! (m_xformPos == m_body->GetPosition()) ) {
-	b2Mat22 rot( m_body->GetAngle() );
+	b2Rot rot( m_body->GetAngle() );
 	b2Vec2 orig = PIXELS_PER_METREf * m_body->GetPosition();
 	m_xformedPath = m_rawPath;
 	m_xformedPath.rotate( rot );
@@ -548,8 +552,8 @@ void Scene::resetWorld()
   worldAABB.lowerBound.Set(-100.0f, -100.0f);
   worldAABB.upperBound.Set(100.0f, 100.0f);
     
-  bool doSleep = true;
-  m_world = new b2World(worldAABB, gravity, doSleep);
+  m_world = new b2World(gravity);
+  m_world->SetAllowSleeping(true);
   m_world->SetContactListener( this );
 }
 
@@ -689,7 +693,7 @@ void Scene::step( bool isPaused )
       }
     }
 
-    m_world->Step( ITERATION_TIMESTEPf, SOLVER_ITERATIONS );
+    m_world->Step( ITERATION_TIMESTEPf, VELOCITY_ITERATIONS, POSITION_ITERATIONS );
     // clean up delete strokes
     for ( int i=0; i< m_strokes.size(); i++ ) {
       if ( m_strokes[i]->hasAttribute(ATTRIB_DELETED) ) {
@@ -710,12 +714,12 @@ void Scene::step( bool isPaused )
 }
 
 // b2ContactListener callback when a new contact is detected
-void Scene::Add(const b2ContactPoint* point) 
+void Scene::BeginContact(b2Contact* contact)
 {     
   // check for completion
   //if (c->GetManifoldCount() > 0) {
-  Stroke* s1 = (Stroke*)point->shape1->GetBody()->GetUserData();
-  Stroke* s2 = (Stroke*)point->shape2->GetBody()->GetUserData();
+  Stroke* s1 = (Stroke*)contact->GetFixtureA()->GetBody()->GetUserData();
+  Stroke* s2 = (Stroke*)contact->GetFixtureB()->GetBody()->GetUserData();
   if ( s1 && s2 ) {
     if ( s2->hasAttribute(ATTRIB_TOKEN) ) {
 	b2Swap( s1, s2 );
@@ -828,7 +832,7 @@ void Scene::clear()
   }
   if ( m_world ) {
     //step is required to actually destroy bodies and joints
-    m_world->Step( ITERATION_TIMESTEPf, SOLVER_ITERATIONS );
+    m_world->Step( ITERATION_TIMESTEPf, VELOCITY_ITERATIONS, POSITION_ITERATIONS );
   }
   m_log.empty();
 }

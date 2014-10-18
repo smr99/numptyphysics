@@ -92,7 +92,7 @@ private:
   void calcDirtyArea();
 
   // b2ContactListener callback when a new contact is detected
-  virtual void Add(const b2ContactPoint* point) ;
+  virtual void BeginContact(b2Contact* contact) ;
 
 
   b2World        *m_world;
