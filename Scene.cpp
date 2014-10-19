@@ -99,7 +99,7 @@ private:
     }
   };
 
-  struct BoxDef : public b2PolygonShape
+  struct BoxDef : public b2FixtureDef
   {
     void init( const Vec2& p1, const Vec2& p2, int attr )
     {
@@ -107,10 +107,9 @@ private:
       b2Vec2 bar = p2 - p1;
       bar *= 1.0f/PIXELS_PER_METREf;
       barOrigin *= 1.0f/PIXELS_PER_METREf;;
-      SetAsBox( bar.Length()/2.0f, 0.1f,
+      m_shape.SetAsBox( bar.Length()/2.0f, 0.1f,
 		0.5f*bar + barOrigin, vec2Angle( bar ));
-      //      SetAsBox( bar.Length()/2.0f+b2_toiSlop, b2_toiSlop*2.0f,
-      //	0.5f*bar + barOrigin, vec2Angle( bar ));
+      shape = &m_shape;
       friction = 0.3f;
       if ( attr & ATTRIB_GROUND ) {
 	density = 0.0f;
@@ -124,6 +123,8 @@ private:
       }
       restitution = 0.2f;
     }
+    
+    b2PolygonShape m_shape;
   };
 
 public:
@@ -244,16 +245,17 @@ public:
     int n = m_shapePath.numPoints();
     if ( n > 1 ) {
       b2BodyDef bodyDef;
-      //bodyDef.type = ???
+      if (hasAttribute(ATTRIB_GROUND)) {
+	  bodyDef.type = b2_staticBody;
+      } else {
+	  bodyDef.type = b2_dynamicBody;
+      }
       bodyDef.position = m_origin;
       bodyDef.position *= 1.0f/PIXELS_PER_METREf;
       bodyDef.userData = this;
-      if ( m_attributes & ATTRIB_SLEEPING ) {
+      if ( hasAttribute(ATTRIB_SLEEPING) ) {
 	bodyDef.allowSleep = true;
 	bodyDef.awake = false;
-      } else {
-	bodyDef.allowSleep = false;
-	bodyDef.awake = true;
       }	  
       m_body = world.CreateBody( &bodyDef );
       for ( int i=1; i<n; i++ ) {
