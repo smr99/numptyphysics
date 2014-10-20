@@ -763,9 +763,7 @@ void Container::draw( Canvas& screen, const Rect& area )
 
 bool Container::processEvent( SDL_Event& ev )
 {
-  if (ev.type == SDL_MOUSEBUTTONUP ||
-          ev.type == SDL_MOUSEBUTTONDOWN ||
-          ev.type == SDL_MOUSEMOTION) {
+  if (ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEBUTTONDOWN ) {
     if (ev.button.which != 0) {
         /**
          * Ignore button events for multi-touch fingers if it
