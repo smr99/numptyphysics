@@ -560,15 +560,18 @@ bool Draggable::onPreEvent( Event& ev )
       m_dragging = false;
       return true;
     } else {
-      //translate into a raw click
+      //translate into the sequence button down / button up
       SDL_Event sdlEv;
       sdlEv.type = SDL_MOUSEBUTTONDOWN;
+      sdlEv.button.which = 0; // which index should be used???
       sdlEv.button.button = SDL_BUTTON_LEFT;
+      sdlEv.button.state = SDL_PRESSED;
       sdlEv.button.x = ev.x;
       sdlEv.button.y = ev.y;
       m_internalEvent = true;
       processEvent(sdlEv);
       sdlEv.type = SDL_MOUSEBUTTONUP;
+      sdlEv.button.state = SDL_RELEASED;
       bool result = processEvent(sdlEv);
       m_internalEvent = false;
       return result;
@@ -760,9 +763,7 @@ void Container::draw( Canvas& screen, const Rect& area )
 
 bool Container::processEvent( SDL_Event& ev )
 {
-  if (ev.type == SDL_MOUSEBUTTONUP ||
-          ev.type == SDL_MOUSEBUTTONDOWN ||
-          ev.type == SDL_MOUSEMOTION) {
+  if (ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEBUTTONDOWN ) {
     if (ev.button.which != 0) {
         /**
          * Ignore button events for multi-touch fingers if it
