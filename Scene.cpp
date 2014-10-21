@@ -18,7 +18,6 @@
 #include "Config.h"
 #include "Scene.h"
 #include "Accelerometer.h"
-#include <Dynamics/b2Body.h>
 
 #include <sstream>
 #include <fstream>
