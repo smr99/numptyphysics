@@ -34,13 +34,13 @@ void Transform::set( float32 scale, float32 rotation, const Vec2& translation )
   if ( scale==0.0f && rotation==0.0f && translation==Vec2(0,0) ) {
     m_bypass = true;
   } else {
-    m_rot.Set( rotation );
+    float32 c = cosf(rotation), s = sinf(rotation);
     m_pos = translation;
-    m_rot.col1.x *= scale;
-    m_rot.col1.y *= scale;
-    m_rot.col2.x *= scale;
-    m_rot.col2.y *= scale;
-    m_invrot = m_rot.Invert();
+    m_rot.ex.x = c * scale;
+    m_rot.ex.y = s * scale;
+    m_rot.ey.x = -s * scale;
+    m_rot.ey.y = c * scale;
+    m_invrot = m_rot.GetInverse();
     m_bypass = false;
   }
 }
@@ -98,7 +98,7 @@ private:
     }
   };
 
-  struct BoxDef : public b2PolygonDef
+  struct BoxDef : public b2FixtureDef
   {
     void init( const Vec2& p1, const Vec2& p2, int attr )
     {
@@ -106,10 +106,9 @@ private:
       b2Vec2 bar = p2 - p1;
       bar *= 1.0f/PIXELS_PER_METREf;
       barOrigin *= 1.0f/PIXELS_PER_METREf;;
-      SetAsBox( bar.Length()/2.0f, 0.1f,
+      m_shape.SetAsBox( bar.Length()/2.0f, 0.1f,
 		0.5f*bar + barOrigin, vec2Angle( bar ));
-      //      SetAsBox( bar.Length()/2.0f+b2_toiSlop, b2_toiSlop*2.0f,
-      //	0.5f*bar + barOrigin, vec2Angle( bar ));
+      shape = &m_shape;
       friction = 0.3f;
       if ( attr & ATTRIB_GROUND ) {
 	density = 0.0f;
@@ -123,6 +122,8 @@ private:
       }
       restitution = 0.2f;
     }
+    
+    b2PolygonShape m_shape;
   };
 
 public:
@@ -243,22 +244,27 @@ public:
     int n = m_shapePath.numPoints();
     if ( n > 1 ) {
       b2BodyDef bodyDef;
+      if (hasAttribute(ATTRIB_GROUND)) {
+	  bodyDef.type = b2_staticBody;
+      } else {
+	  bodyDef.type = b2_dynamicBody;
+      }
       bodyDef.position = m_origin;
       bodyDef.position *= 1.0f/PIXELS_PER_METREf;
       bodyDef.userData = this;
-      if ( m_attributes & ATTRIB_SLEEPING ) {
-	bodyDef.isSleeping = true;
-      }
+      if ( hasAttribute(ATTRIB_SLEEPING) ) {
+	bodyDef.allowSleep = true;
+	bodyDef.awake = false;
+      }	  
       m_body = world.CreateBody( &bodyDef );
       for ( int i=1; i<n; i++ ) {
 	BoxDef boxDef;
 	boxDef.init( m_shapePath.point(i-1),
 		     m_shapePath.point(i),
 		     m_attributes );
-	m_body->CreateShape( &boxDef );
+	m_body->CreateFixture( &boxDef );
       }
-      m_body->SetMassFromShapes();
-
+      m_body->SetAwake(!hasAttribute(ATTRIB_SLEEPING));
     }
     transform();
   }
@@ -367,7 +373,7 @@ public:
     if ( m_body ) {
       b2Vec2 pw = p;
       pw *= 1.0f/PIXELS_PER_METREf;
-      m_body->SetXForm( pw, m_body->GetAngle() );
+      m_body->SetTransform( pw, m_body->GetAngle() );
     }
     m_origin = p;
     m_drawn = false;
@@ -417,7 +423,7 @@ public:
       
       if (m_body) {
 	// stash the body where no-one will find it
-	m_body->SetXForm( b2Vec2(0.0f,SCREEN_HEIGHT*2.0f), 0.0f );
+	m_body->SetTransform( b2Vec2(0.0f,SCREEN_HEIGHT*2.0f), 0.0f );
 	m_body->SetLinearVelocity( b2Vec2(0.0f,0.0f) );
 	m_body->SetAngularVelocity( 0.0f );
       }
@@ -478,7 +484,7 @@ private:
 	return false; // ground strokes never move.
       } else if ( m_xformAngle != m_body->GetAngle() 
 	   ||  ! (m_xformPos == m_body->GetPosition()) ) {
-	b2Mat22 rot( m_body->GetAngle() );
+	b2Rot rot( m_body->GetAngle() );
 	b2Vec2 orig = PIXELS_PER_METREf * m_body->GetPosition();
 	m_xformedPath = m_rawPath;
 	m_xformedPath.rotate( rot );
@@ -524,7 +530,8 @@ Scene::Scene( bool noWorld )
     m_protect( 0 ),
     m_gravity(0.0f, 0.0f),
     m_dynamicGravity(false),
-    m_accelerometer(Os::get()->getAccelerometer())
+    m_accelerometer(Os::get()->getAccelerometer()),
+    m_reset_sleepers(true)
 {
   if ( !noWorld ) {
     resetWorld();
@@ -548,9 +555,10 @@ void Scene::resetWorld()
   worldAABB.lowerBound.Set(-100.0f, -100.0f);
   worldAABB.upperBound.Set(100.0f, 100.0f);
     
-  bool doSleep = true;
-  m_world = new b2World(worldAABB, gravity, doSleep);
+  m_world = new b2World(gravity);
+  m_world->SetAllowSleeping(true);
   m_world->SetContactListener( this );
+  m_reset_sleepers = true;
 }
 
 Stroke* Scene::newStroke( const Path& p, int colour, int attribs ) {
@@ -689,7 +697,19 @@ void Scene::step( bool isPaused )
       }
     }
 
-    m_world->Step( ITERATION_TIMESTEPf, SOLVER_ITERATIONS );
+    m_world->Step( ITERATION_TIMESTEPf, VELOCITY_ITERATIONS, POSITION_ITERATIONS );
+    
+    if (m_reset_sleepers)
+    {
+	for(b2Body* body = m_world->GetBodyList(); body; body = body->GetNext())
+	{
+	    Stroke* stroke = static_cast<Stroke*>(body->GetUserData());
+	    if (stroke)
+		body->SetAwake(!stroke->hasAttribute(ATTRIB_SLEEPING));
+	}
+	m_reset_sleepers = false;
+    }
+    
     // clean up delete strokes
     for ( int i=0; i< m_strokes.size(); i++ ) {
       if ( m_strokes[i]->hasAttribute(ATTRIB_DELETED) ) {
@@ -710,12 +730,12 @@ void Scene::step( bool isPaused )
 }
 
 // b2ContactListener callback when a new contact is detected
-void Scene::Add(const b2ContactPoint* point) 
+void Scene::BeginContact(b2Contact* contact)
 {     
   // check for completion
   //if (c->GetManifoldCount() > 0) {
-  Stroke* s1 = (Stroke*)point->shape1->GetBody()->GetUserData();
-  Stroke* s2 = (Stroke*)point->shape2->GetBody()->GetUserData();
+  Stroke* s1 = (Stroke*)contact->GetFixtureA()->GetBody()->GetUserData();
+  Stroke* s2 = (Stroke*)contact->GetFixtureB()->GetBody()->GetUserData();
   if ( s1 && s2 ) {
     if ( s2->hasAttribute(ATTRIB_TOKEN) ) {
 	b2Swap( s1, s2 );
@@ -828,7 +848,7 @@ void Scene::clear()
   }
   if ( m_world ) {
     //step is required to actually destroy bodies and joints
-    m_world->Step( ITERATION_TIMESTEPf, SOLVER_ITERATIONS );
+    m_world->Step( ITERATION_TIMESTEPf, VELOCITY_ITERATIONS, POSITION_ITERATIONS );
   }
   m_log.empty();
 }

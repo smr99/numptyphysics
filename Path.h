@@ -42,6 +42,7 @@ public:
   void makeRelative();
   Path& translate(const Vec2& xlate);
   Path& rotate(const b2Mat22& rot);
+  Path& rotate(const b2Rot& rot);
   Path& scale(float32 factor);
 
   inline Vec2& origin() { return at(0); }

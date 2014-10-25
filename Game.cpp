@@ -356,7 +356,7 @@ public:
       for ( int i=0; i<m_jointCandidates.size(); i++ ) {
 	Path joint = m_jointInd;
 	joint.translate( -joint.bbox().centroid() );
-	joint.rotate( b2Mat22(rot*2.0*3.141) );
+	joint.rotate( b2Rot(rot*2.0*3.141) );
 	joint.translate( m_jointCandidates[i] + joint.bbox().centroid() );
 	screen.drawPath( joint, 0x606060 );
       }

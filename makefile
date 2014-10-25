@@ -1,4 +1,5 @@
-CXXFLAGS = -O2 -Wall
+CXXFLAGS = -g -O2 -Wall 
+
 APP = numptyphysics
 
 DESTDIR ?=
@@ -22,23 +23,13 @@ SOURCES_TEST = $(wildcard test/*.cpp)
 all: $(APP)
 
 # Required modules (uses pkg-config)
-PKGS = sdl SDL_image x11
+PKGS = box2d sdl SDL_image x11
 
 CXXFLAGS += $(shell pkg-config --cflags $(PKGS))
 LIBS += $(shell pkg-config --libs $(PKGS))
 
 # No pkg-config module for SDL_ttf and zlib (on some systems)
 LIBS += -lSDL_ttf -lz
-
-
-# Box2D Library
-CXXFLAGS += -IBox2D/Include
-BOX2D_SOURCE := Box2D/Source
-BOX2D_LIBRARY := Gen/float/libbox2d.a
-LIBS += $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
-
-$(BOX2D_SOURCE)/$(BOX2D_LIBRARY):
-	$(MAKE) -C $(BOX2D_SOURCE) $(BOX2D_LIBRARY)
 
 	
 GTEST_DIR = /usr/src/gtest
@@ -55,14 +46,14 @@ CXXFLAGS += -MD
 OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS_OS = $(SOURCES_OS:.cpp=.o)
 OBJECTS_OS_TEST = $(subst os,test,$(OBJECTS_OS))
-OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o) $(OBJECTS) $(OBJECTS_OS_TEST)
+OBJECTS_TEST = $(SOURCES_TEST:.cpp=.o) $(OBJECTS) $(OBJECTS_OS_TEST) gtest-all.o gtest_main.o
 
 Dialogs.cpp: help_text_html.h
 
 %_html.h: %.html
 	xxd -i $< $@
 
-$(APP): $(OBJECTS) $(OBJECTS_OS) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
+$(APP): $(OBJECTS) $(OBJECTS_OS)
 	$(CXX) -o $@ $^ $(LIBS)
 
 check: tester
@@ -77,17 +68,16 @@ gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
 $(OBJECTS_OS_TEST): $(SOURCES_OS)
 	$(CXX) $(CXXFLAGS) -DTEST -c -o $@ $^
 
-tester: $(OBJECTS_TEST) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY) gtest-all.o gtest_main.o
+tester: $(OBJECTS_TEST)
 	$(CXX) -o $@ $^ $(LIBS) -lpthread
 	
 clean:
 	rm -f $(OBJECTS) $(OBJECTS_OS) $(OBJECTS_TEST) $(OBJECTS_OS_TEST)
 	rm -f $(DEPENDENCIES)
 	rm -f help_text_html.h
-	$(MAKE) -C Box2D/Source clean
 
 distclean: clean
-	rm -f $(APP)
+	rm -f $(APP) tester
 
 install: $(APP)
 	mkdir -p $(DESTDIR)$(BINDIR)
