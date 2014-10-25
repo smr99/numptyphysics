@@ -114,11 +114,18 @@ private:
 
 
 
+/**
+ * @brief Transform vector or path
+ * 
+ * The transform is of the form v |--> sRv + t
+ * Where s is a scale factor, R is rotation matrix, and t is a translation.
+ * 
+ */
 class Transform
 {
 public:
-  Transform( float32 scale, float32 rotation, const Vec2& translation );
-  void set( float32 scale, float32 rotation, const Vec2& translation );
+  Transform( float32 scale, float32 rotationRadians, const Vec2& translation );
+  void set( float32 scale, float32 rotationRadians, const Vec2& translation );
 
   inline void transform( const Path& pin, Path& pout ) {
     pout = pin;
