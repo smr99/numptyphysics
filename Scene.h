@@ -110,6 +110,14 @@ private:
   bool            m_dynamicGravity;
   Accelerometer  *m_accelerometer;
   Rect            m_dirtyArea;
+  
+  // Box2D 2.0.1 allows dynamic bodies in the world to be created sleeping and remain in that state
+  // until contact is made.  On the other hand, Box2D 2.3.1 will wake up some or all of these bodies
+  // after the first iteration.  Many of NumptyPhysics' levels are written assuming the specific 
+  // behaviour of older Box2D.  To recreate the older behaviour, we set the following flag when a 
+  // Scene is created or reset to cause the sleeping flag to be reset after one simulation step.
+  //
+  bool            m_reset_sleepers;
 };
 
 

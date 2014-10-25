@@ -264,6 +264,7 @@ public:
 		     m_attributes );
 	m_body->CreateFixture( &boxDef );
       }
+      m_body->SetAwake(!hasAttribute(ATTRIB_SLEEPING));
     }
     transform();
   }
@@ -529,7 +530,8 @@ Scene::Scene( bool noWorld )
     m_protect( 0 ),
     m_gravity(0.0f, 0.0f),
     m_dynamicGravity(false),
-    m_accelerometer(Os::get()->getAccelerometer())
+    m_accelerometer(Os::get()->getAccelerometer()),
+    m_reset_sleepers(true)
 {
   if ( !noWorld ) {
     resetWorld();
@@ -556,6 +558,7 @@ void Scene::resetWorld()
   m_world = new b2World(gravity);
   m_world->SetAllowSleeping(true);
   m_world->SetContactListener( this );
+  m_reset_sleepers = true;
 }
 
 Stroke* Scene::newStroke( const Path& p, int colour, int attribs ) {
@@ -695,6 +698,18 @@ void Scene::step( bool isPaused )
     }
 
     m_world->Step( ITERATION_TIMESTEPf, VELOCITY_ITERATIONS, POSITION_ITERATIONS );
+    
+    if (m_reset_sleepers)
+    {
+	for(b2Body* body = m_world->GetBodyList(); body; body = body->GetNext())
+	{
+	    Stroke* stroke = static_cast<Stroke*>(body->GetUserData());
+	    if (stroke)
+		body->SetAwake(!stroke->hasAttribute(ATTRIB_SLEEPING));
+	}
+	m_reset_sleepers = false;
+    }
+    
     // clean up delete strokes
     for ( int i=0; i< m_strokes.size(); i++ ) {
       if ( m_strokes[i]->hasAttribute(ATTRIB_DELETED) ) {
