@@ -17,15 +17,15 @@
 #ifndef WORKER_H
 #define WORKER_H
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_thread.h>
+#include <SDL.h>
+#include <SDL_thread.h>
 
 class WorkerBase
 {
  public:
   WorkerBase( int (*func)(void*)=startThread );  
   virtual ~WorkerBase();
-  void start();
+  void start(const char* thread_name);
   virtual void main() =0;
   void wait();
   bool done();

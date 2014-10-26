@@ -28,14 +28,14 @@ WorkerBase::~WorkerBase()
 {
   if (m_thread) {
     //TODO need cleaner termination/forget - worker may leak resources
-    SDL_KillThread(m_thread);
+    //SDL_KillThread(m_thread);
   }
 }
 
-void WorkerBase::start()
+void WorkerBase::start(const char* thread_name)
 {
   if (m_func) {
-    m_thread = SDL_CreateThread(m_func, this);
+    m_thread = SDL_CreateThread(m_func, thread_name, this);
   }
 }
 
