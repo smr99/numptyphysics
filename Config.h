@@ -21,7 +21,7 @@
 #include "Common.h"
 #include "Os.h"
 
-#define PROJECT_HOMEPAGE "http://github.com/harmattan/numptyphysics"
+#define PROJECT_HOMEPAGE "http://numptyphysics.garage.maemo.org/"
 
 #define WORLD_WIDTH  800
 #define WORLD_HEIGHT 480
@@ -33,7 +33,8 @@
 #define MULTI_VERTEX_LIMIT 64
 
 #define ITERATION_RATE    60 //fps
-#define SOLVER_ITERATIONS 8
+#define VELOCITY_ITERATIONS 10
+#define POSITION_ITERATIONS 8
 
 #ifdef USE_HILDON //maemo
 #  define MIN_RENDER_RATE   10 //fps

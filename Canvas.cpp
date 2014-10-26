@@ -340,21 +340,6 @@ void Canvas::fade( const Rect& rr )
   SDL_UnlockSurface(SURFACE(this));
 }
 
-#if 0
-inline uint32 avg2Pixels565(uint32 a, uint32 b)
-{
-  return (((a^b)&0xf7def7de)>>1) + (a&b);
-}
-
-inline uint16 avgPixels565(uint32 ab)
-{
-  uint16 a = ab >> 16;
-  uint16 v = ab & 0xffff;
-  
-  return (((a^b)&0xf7def7de)>>1) + (a&b);
-}
-#endif
-
 
 Canvas* Canvas::scale( int factor ) const
 {
@@ -670,8 +655,6 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
   XStoreName( sys.info.x11.display,
 	      sys.info.x11.fswindow,
 	      title );
-		  
- 
 #endif
 }
 
@@ -679,12 +662,12 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
 void Window::update( const Rect& r )
 {
   if ( r.tl.x < width() && r.tl.y < height() ) {
-    int x1 = Max( 0, r.tl.x );
-    int y1 = Max( 0, r.tl.y );
-    int x2 = Min( width()-1, r.br.x );
-    int y2 = Min( height()-1, r.br.y );
-    int w  = Max( 0, x2-x1 );
-    int h  = Max( 0, y2-y1 );
+    int x1 = std::max( 0, r.tl.x );
+    int y1 = std::max( 0, r.tl.y );
+    int x2 = std::min( width()-1, r.br.x );
+    int y2 = std::min( height()-1, r.br.y );
+    int w  = std::max( 0, x2-x1 );
+    int h  = std::max( 0, y2-y1 );
     if ( w > 0 && h > 0 ) {
       SDL_UpdateRect( SURFACE(this), x1, y1, w, h );
 #ifdef USE_HILDON

@@ -92,7 +92,7 @@ private:
   void calcDirtyArea();
 
   // b2ContactListener callback when a new contact is detected
-  virtual void Add(const b2ContactPoint* point) ;
+  virtual void BeginContact(b2Contact* contact) ;
 
 
   b2World        *m_world;
@@ -110,15 +110,30 @@ private:
   bool            m_dynamicGravity;
   Accelerometer  *m_accelerometer;
   Rect            m_dirtyArea;
+  
+  // Box2D 2.0.1 allows dynamic bodies in the world to be created sleeping and remain in that state
+  // until contact is made.  On the other hand, Box2D 2.3.1 will wake up some or all of these bodies
+  // after the first iteration.  Many of NumptyPhysics' levels are written assuming the specific 
+  // behaviour of older Box2D.  To recreate the older behaviour, we set the following flag when a 
+  // Scene is created or reset to cause the sleeping flag to be reset after one simulation step.
+  //
+  bool            m_reset_sleepers;
 };
 
 
 
+/**
+ * @brief Transform vector or path
+ * 
+ * The transform is of the form v |--> sRv + t
+ * Where s is a scale factor, R is rotation matrix, and t is a translation.
+ * 
+ */
 class Transform
 {
 public:
-  Transform( float32 scale, float32 rotation, const Vec2& translation );
-  void set( float32 scale, float32 rotation, const Vec2& translation );
+  Transform( float32 scale, float32 rotationRadians, const Vec2& translation );
+  void set( float32 scale, float32 rotationRadians, const Vec2& translation );
 
   inline void transform( const Path& pin, Path& pout ) {
     pout = pin;

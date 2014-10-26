@@ -64,6 +64,7 @@ void Widget::sizeTo( const Vec2& size )
 {
   m_pos.br=m_pos.tl+size;  
   onResize();
+  dirty();
   if (m_parent) m_parent->dirty();
 }
 
@@ -559,15 +560,18 @@ bool Draggable::onPreEvent( Event& ev )
       m_dragging = false;
       return true;
     } else {
-      //translate into a raw click
+      //translate into the sequence button down / button up
       SDL_Event sdlEv;
       sdlEv.type = SDL_MOUSEBUTTONDOWN;
+      sdlEv.button.which = 0; // which index should be used???
       sdlEv.button.button = SDL_BUTTON_LEFT;
+      sdlEv.button.state = SDL_PRESSED;
       sdlEv.button.x = ev.x;
       sdlEv.button.y = ev.y;
       m_internalEvent = true;
       processEvent(sdlEv);
       sdlEv.type = SDL_MOUSEBUTTONUP;
+      sdlEv.button.state = SDL_RELEASED;
       bool result = processEvent(sdlEv);
       m_internalEvent = false;
       return result;
@@ -659,18 +663,7 @@ void ScrollArea::draw( Canvas& screen, const Rect& area )
   if (cpos.br.y < m_pos.br.y && cpos.height() > m_pos.height()) {
     m_contents->moveTo(Vec2(cpos.tl.x,m_pos.br.y - cpos.size().y));
   }
-#if 1
   Container::draw(screen,area);
-#else
-  screen.drawRect(m_pos, screen.makeColour(0xff,0,0), true);
-  if (m_canvas) {
-    if (m_contents->isDirty()) {
-      Rect relArea = area - m_pos.tl;
-      m_contents->draw(*m_canvas, relArea);
-    }
-    screen.drawImage(m_canvas, m_pos.tl.x, m_pos.tl.y);
-  }
-#endif
 }
 
 void ScrollArea::add( Widget* w, int x, int y )
@@ -740,7 +733,7 @@ Rect Container::dirtyArea()
   if (m_dirty) {
     return m_pos;
   }
-  Rect r(false);
+  Rect r;
   for (int i=0; i<m_children.size(); ++i) {
     r.expand(m_children[i]->dirtyArea());
   }
@@ -770,9 +763,7 @@ void Container::draw( Canvas& screen, const Rect& area )
 
 bool Container::processEvent( SDL_Event& ev )
 {
-  if (ev.type == SDL_MOUSEBUTTONUP ||
-          ev.type == SDL_MOUSEBUTTONDOWN ||
-          ev.type == SDL_MOUSEMOTION) {
+  if (ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEBUTTONDOWN ) {
     if (ev.button.which != 0) {
         /**
          * Ignore button events for multi-touch fingers if it
