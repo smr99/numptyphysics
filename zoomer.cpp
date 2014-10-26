@@ -242,7 +242,8 @@ SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy)
    /*
     * Turn on source-alpha support 
     */
-   SDL_SetAlpha(rz_dst, SDL_SRCALPHA, 255);
+   SDL_SetSurfaceAlphaMod(rz_dst, 255);
+   SDL_SetSurfaceBlendMode(rz_dst, SDL_BLENDMODE_BLEND);
     } else {
    /*
     * Copy palette and colorkey info 
@@ -358,7 +359,7 @@ SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy)
         free(say);
 
 
-   SDL_SetColorKey(rz_dst, SDL_SRCCOLORKEY | SDL_RLEACCEL, rz_src->format->colorkey);
+   SDL_SetColorKey(rz_dst, SDL_TRUE, rz_src->format->colorkey);
     }
     /*
      * Unlock source surface 
