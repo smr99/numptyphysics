@@ -30,7 +30,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <stdexcept>
 
 class App : private Container
@@ -224,8 +224,8 @@ private:
       case SDL_QUIT:
 	m_quit = true;
 	return;
-      case SDL_ACTIVEEVENT:
-	if (ev.active.gain > 0) {
+      case SDL_WINDOWEVENT:
+	if (ev.window.event == SDL_WINDOWEVENT_ENTER) {
 	  return;
 	}
 	break;
@@ -239,8 +239,8 @@ private:
     case SDL_QUIT:
       m_quit = true;
       return true;
-    case SDL_ACTIVEEVENT:
-      if (ev.active.gain == 0) {
+    case SDL_WINDOWEVENT:
+      if (ev.window.event == SDL_WINDOWEVENT_LEAVE) {
 	waitActive();
       }
       break;
