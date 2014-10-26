@@ -10,6 +10,7 @@ BINDIR = $(PREFIX)/bin
 DATAROOTDIR = $(PREFIX)/share
 DESKTOPDIR = $(DATAROOTDIR)/applications
 MANDIR = $(DATAROOTDIR)/man
+PIXMAPDIR = $(DATAROOTDIR)/pixmaps
 
 # App-specific directories
 DATADIR = $(DATAROOTDIR)/$(APP)
@@ -88,6 +89,7 @@ install: $(APP)
 	cp -rpv data/*.png data/*.ttf data/*.npz $(DESTDIR)$(DATADIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man6
 	install -m 644 $(APP).6 $(DESTDIR)$(MANDIR)/man6
+	install -m 655 data/numptyphysics.png $(DESTDIR)$(PIXMAPDIR)
 
 
 .PHONY: all clean distclean
