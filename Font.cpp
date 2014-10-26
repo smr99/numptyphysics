@@ -16,7 +16,7 @@
 #include "Font.h"
 #include "Canvas.h"
 #include "Config.h"
-#include <SDL/SDL_ttf.h>
+#include <SDL_ttf.h>
 
 #define FONT(fONTpTR) ((TTF_Font*)((fONTpTR)->m_state))
 

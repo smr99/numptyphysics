@@ -22,7 +22,7 @@
 #include "Event.h"
 
 #include <string>
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 class Canvas;
 class Widget;
