@@ -357,9 +357,6 @@ SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy)
          */
         free(sax);
         free(say);
-
-
-        SDL_SetColorKey(rz_dst, SDL_TRUE, rz_src->format->colorkey);
     }
     /*
      * Unlock source surface
