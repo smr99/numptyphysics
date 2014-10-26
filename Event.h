@@ -17,6 +17,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 #include <SDL.h>
+#include <SDL_keycode.h>
 
 // custom SDL User Event code
 const int WORKER_DONE = 1;
@@ -89,12 +90,12 @@ struct EventMap
 class BasicEventMap : public EventMap
 {
  public:
-  struct KeyPair { SDLKey sym; Event::Code ev; };
+  struct KeyPair { SDL_Keycode sym; Event::Code ev; };
   struct ButtonPair { unsigned char button; Event::Code down; Event::Code move; Event::Code up; };
   BasicEventMap( const KeyPair* keys, const ButtonPair* buttons );
   Event process(const SDL_Event& ev);
  protected:
-  const KeyPair* lookupKey(SDLKey sym);
+  const KeyPair* lookupKey(SDL_Keycode sym);
   const ButtonPair* lookupButton(unsigned char button);
  private:
   const KeyPair* m_keys;

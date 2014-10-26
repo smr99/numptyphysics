@@ -48,7 +48,7 @@ Event BasicEventMap::process(const SDL_Event& ev)
 }
 
 const BasicEventMap::KeyPair*
-BasicEventMap::lookupKey(SDLKey sym)
+BasicEventMap::lookupKey(SDL_Keycode sym)
 {
   const KeyPair* p = m_keys;
   while (p && p->sym) {
