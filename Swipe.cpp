@@ -27,14 +27,5 @@ Swipe::lock(bool locked)
             XA_CARDINAL, 32, PropModeReplace,
             reinterpret_cast<unsigned char*>(&customRegion[0]), 4);
 
-    XChangeProperty(m_syswminfo.info.x11.display,
-            m_syswminfo.info.x11.fswindow, customRegionAtom,
-            XA_CARDINAL, 32, PropModeReplace,
-            reinterpret_cast<unsigned char*>(&customRegion[0]), 4);
-
-    XChangeProperty(m_syswminfo.info.x11.display,
-            m_syswminfo.info.x11.wmwindow, customRegionAtom,
-            XA_CARDINAL, 32, PropModeReplace,
-            reinterpret_cast<unsigned char*>(&customRegion[0]), 4);
 }
 
