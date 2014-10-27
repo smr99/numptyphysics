@@ -18,7 +18,6 @@
 #include "Config.h"
 #include <SDL_ttf.h>
 
-#define FONT(fONTpTR) ((TTF_Font*)((fONTpTR)->m_state))
 
 struct FontCanvas : public Canvas
 {
@@ -32,7 +31,7 @@ Font::Font( const std::string& file, int ptsize )
 {
   TTF_Init();
   std::string fname = Config::findFile(file);
-  m_state = TTF_OpenFont( fname.c_str(), ptsize );
+  m_ttf_font = TTF_OpenFont( fname.c_str(), ptsize );
   m_height = metrics("M").y;
 }
 
@@ -40,7 +39,7 @@ Font::Font( const std::string& file, int ptsize )
 Vec2 Font::metrics( const std::string& text ) const
 {
   Vec2 m;
-  TTF_SizeText( FONT(this), text.c_str(), &m.x, &m.y );
+  TTF_SizeText( m_ttf_font, text.c_str(), &m.x, &m.y );
   return m;
 }
 
@@ -49,7 +48,7 @@ void Font::drawLeft( Canvas* canvas, Vec2 pt,
 		     const std::string& text, int colour ) const
 {
   SDL_Color fg = { static_cast<Uint8>(colour>>16), static_cast<Uint8>(colour>>8), static_cast<Uint8>(colour) };
-  FontCanvas temp( TTF_RenderText_Blended( FONT(this),
+  FontCanvas temp( TTF_RenderText_Blended( m_ttf_font,
 					   text.c_str(),
 					   fg ) );
   canvas->drawImage( &temp, pt.x, pt.y );

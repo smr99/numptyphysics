@@ -21,6 +21,7 @@
 #include "Path.h"
 #include "Array.h"
 #include <string>
+#include <SDL_ttf.h>
 
 class Canvas;
 
@@ -43,8 +44,7 @@ class Font
   static const Font* headingFont();
   static const Font* blurbFont();
  private:
-  typedef void* State;
-  State m_state;
+  TTF_Font* m_ttf_font;
   int m_height;
 };
 

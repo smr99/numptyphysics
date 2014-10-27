@@ -210,17 +210,15 @@ inline void renderLine( void *buf,
 }
 
 
-#define SURFACE(cANVASpTR) ((SDL_Surface*)((cANVASpTR)->m_state))
-
 Canvas::Canvas( int w, int h )
-  : m_state(NULL),
+  : m_surface(NULL),
     m_bgColour(0),
     m_bgImage(NULL)
 {
   switch (SDL_GetVideoInfo()->vfmt->BitsPerPixel) {
   case 16:
   case 32:
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 
+    m_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 
 				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
 				    SDL_GetVideoInfo()->vfmt->Rmask,
 				    SDL_GetVideoInfo()->vfmt->Gmask,
@@ -229,7 +227,7 @@ Canvas::Canvas( int w, int h )
     break;
   default:
     // eg: dummy vid driver reports 8bpp
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 32,
+    m_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 32,
 				    0xFF0000, 0x00FF00, 0x0000FF, 0xFF000000 );
     break;
   }
@@ -237,8 +235,8 @@ Canvas::Canvas( int w, int h )
 }
 
 
-Canvas::Canvas( State state )
-  : m_state(state),
+Canvas::Canvas( SDL_Surface* surface )
+  : m_surface(surface),
     m_bgColour(0),
     m_bgImage(NULL)
 {
@@ -247,35 +245,35 @@ Canvas::Canvas( State state )
 
 Canvas::~Canvas()
 {
-  if (SURFACE(this)) {
-    SDL_FreeSurface(SURFACE(this));
+  if (m_surface) {
+    SDL_FreeSurface(m_surface);
   }
 }
 
 int Canvas::width() const
 {
-  return SURFACE(this)->w;
+  return m_surface->w;
 }
 
 int Canvas::height() const
 {
-  return SURFACE(this)->h;
+  return m_surface->h;
 }
 
 int Canvas::makeColour( int r, int g, int b ) const
 {
-  return SDL_MapRGB( SURFACE(this)->format, r, g, b );
+  return SDL_MapRGB( m_surface->format, r, g, b );
 }
 
 int Canvas::makeColour( int c ) const
 {
-  return SDL_MapRGB( SURFACE(this)->format,
+  return SDL_MapRGB( m_surface->format,
 		     (c>>16)&0xff, (c>>8)&0xff, (c>>0)&0xff );
 }
 
 void Canvas::resetClip()
 {
-  if ( m_state ) {
+  if ( m_surface ) {
     setClip( 0, 0, width(), height() );
   } else {
     setClip( 0, 0, 0, 0 );
@@ -300,9 +298,9 @@ void Canvas::setBackground( Canvas* bg )
 void Canvas::clear()
 {
   if ( m_bgImage ) {
-    SDL_BlitSurface( SURFACE(m_bgImage), NULL, SURFACE(this), NULL );
+    SDL_BlitSurface( m_bgImage->m_surface, NULL, m_surface, NULL );
   } else {
-    SDL_FillRect( SURFACE(this), NULL, m_bgColour );
+    SDL_FillRect( m_surface, NULL, m_bgColour );
   }
 }
 
@@ -311,14 +309,14 @@ void Canvas::fade( const Rect& rr )
   Uint32 bpp;
   Rect r = rr;
   r.clipTo( m_clip );
-  bpp = SURFACE(this)->format->BytesPerPixel;
-  char* row = (char*)SURFACE(this)->pixels;
+  bpp = m_surface->format->BytesPerPixel;
+  char* row = (char*)m_surface->pixels;
   int pixStride = width();
   int w = r.br.x - r.tl.x;
   int h = r.br.y - r.tl.y;
   row += (r.tl.x + r.tl.y * pixStride) * bpp;
 
-  SDL_LockSurface(SURFACE(this));
+  SDL_LockSurface(m_surface);
   switch ( bpp ) {
   case 2: 
     for ( int r=h; r>0; r-- ) {
@@ -337,7 +335,7 @@ void Canvas::fade( const Rect& rr )
     }
     break;
   }
-  SDL_UnlockSurface(SURFACE(this));
+  SDL_UnlockSurface(m_surface);
 }
 
 
@@ -345,15 +343,15 @@ Canvas* Canvas::scale( int factor ) const
 {
   Canvas *c = new Canvas( width()/factor, height()/factor );  
   if ( c ) {
-    if ( factor==4 && SURFACE(this)->format->BytesPerPixel==2 ) {
+    if ( factor==4 && m_surface->format->BytesPerPixel==2 ) {
       const uint16 MASK2LSB = 0xe79c;
-      int dpitch = SURFACE(c)->pitch / sizeof(uint16_t);
-      int spitch = SURFACE(this)->pitch / sizeof(uint16_t);
-      uint16_t *drow = (uint16_t*)SURFACE(c)->pixels;
+      int dpitch = c->m_surface->pitch / sizeof(uint16_t);
+      int spitch = m_surface->pitch / sizeof(uint16_t);
+      uint16_t *drow = (uint16_t*) c->m_surface->pixels;
       for ( int y=0;y<c->height();y++ ) {
 	for ( int x=0;x<c->width();x++ ) {
           uint16 p = 0;
-	  uint16_t *srow = (uint16_t*)SURFACE(this)->pixels
+	  uint16_t *srow = (uint16_t*)m_surface->pixels
   	                    + (y*spitch+x)*factor;
 	  for ( int yy=0;yy<4;yy++ ) {
             uint16 q = 0;
@@ -367,13 +365,13 @@ Canvas* Canvas::scale( int factor ) const
 	}
 	drow += dpitch;
       }
-    } else if (SURFACE(this)->format->BytesPerPixel==2 ) {
-      int dpitch = SURFACE(c)->pitch / sizeof(uint16_t);
-      int spitch = SURFACE(this)->pitch / sizeof(uint16_t);
-      uint16_t *drow = (uint16_t*)SURFACE(c)->pixels;
+    } else if (m_surface->format->BytesPerPixel==2 ) {
+      int dpitch = c->m_surface->pitch / sizeof(uint16_t);
+      int spitch = m_surface->pitch / sizeof(uint16_t);
+      uint16_t *drow = (uint16_t*)c->m_surface->pixels;
       for ( int y=0;y<c->height();y++ ) {
 	for ( int x=0;x<c->width();x++ ) {
-	  uint16_t *srow = (uint16_t*)SURFACE(this)->pixels
+	  uint16_t *srow = (uint16_t*)m_surface->pixels
   	                    + (y*spitch+x)*factor;
 	  uint32_t r=0,g=0,b=0;
 	  for ( int yy=0;yy<factor;yy++ ) {
@@ -399,7 +397,7 @@ Canvas* Canvas::scale( int factor ) const
 	  for ( int yy=0;yy<factor;yy++ ) {
 	    for ( int xx=0;xx<factor;xx++ ) {
 	      SDL_GetRGB( readPixel( x*factor+xx, y*factor+yy ),
-			  SURFACE(this)->format, &rr,&gg,&bb );
+			  m_surface->format, &rr,&gg,&bb );
 	      r += rr;
 	      g += gg;
 	      b += bb;
@@ -418,12 +416,12 @@ Canvas* Canvas::scale( int factor ) const
 void Canvas::scale( int w, int h )
 {
   if ( w!=width() && h!=height() ) {
-    SDL_Surface *s = zoomSurface( SURFACE(this),
+    SDL_Surface *s = zoomSurface( m_surface,
 				  (double)w/(double)width(),
 				  (double)h/(double)height() );
     if ( s ) {
-      SDL_FreeSurface( SURFACE(this) );
-      m_state = s;
+      SDL_FreeSurface( m_surface );
+      m_surface = s;
     }
   }
 }
@@ -441,7 +439,7 @@ void Canvas::clear( const Rect& r )
 {
   if ( m_bgImage ) {
     SDL_Rect srcRect = make_SDL_Rect(r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1);
-    SDL_BlitSurface( SURFACE(m_bgImage), &srcRect, SURFACE(this), &srcRect );
+    SDL_BlitSurface( m_bgImage->m_surface, &srcRect, m_surface, &srcRect );
   } else {
     drawRect( r, m_bgColour );
   }
@@ -454,23 +452,23 @@ void Canvas::drawImage( Canvas *canvas, int x, int y )
 
   SDL_Rect sdlsrc = make_SDL_Rect(dest.tl.x-x, dest.tl.y-y, dest.width(), dest.height());
   SDL_Rect sdldst = make_SDL_Rect(dest.tl.x, dest.tl.y, 0, 0);
-  SDL_BlitSurface( SURFACE(canvas), &sdlsrc, SURFACE(this), &sdldst );
+  SDL_BlitSurface( canvas->m_surface, &sdlsrc, m_surface, &sdldst );
 }
 
 void Canvas::drawPixel( int x, int y, int c )
 {
   Uint32 bpp, ofs;
 
-  bpp = SURFACE(this)->format->BytesPerPixel;
-  ofs = SURFACE(this)->pitch*y;
-  char* row = (char*)SURFACE(this)->pixels + ofs;
+  bpp = m_surface->format->BytesPerPixel;
+  ofs = m_surface->pitch*y;
+  char* row = (char*)m_surface->pixels + ofs;
 
-  SDL_LockSurface(SURFACE(this));
+  SDL_LockSurface(m_surface);
   switch ( bpp ) {
   case 2: ((Uint16*)row)[x] = c; break;
   case 4: ((Uint32*)row)[x] = c; break;
   }
-  SDL_UnlockSurface(SURFACE(this));
+  SDL_UnlockSurface(m_surface);
 }
 
 int Canvas::readPixel( int x, int y ) const
@@ -478,17 +476,17 @@ int Canvas::readPixel( int x, int y ) const
   Uint32 bpp, ofs;
   int c;
 
-  bpp = SURFACE(this)->format->BytesPerPixel;
-  ofs = SURFACE(this)->pitch*y;
-  char* row = (char*)SURFACE(this)->pixels + ofs;
+  bpp = m_surface->format->BytesPerPixel;
+  ofs = m_surface->pitch*y;
+  char* row = (char*)m_surface->pixels + ofs;
 
-  SDL_LockSurface(SURFACE(this));
+  SDL_LockSurface(m_surface);
   switch ( bpp ) {
   case 2: c = ((Uint16*)row)[x]; break;
   case 4: c = ((Uint32*)row)[x]; break;
   default: c=0; break;
   }
-  SDL_UnlockSurface(SURFACE(this));
+  SDL_UnlockSurface(m_surface);
   return c;
 }
 
@@ -541,32 +539,32 @@ void Canvas::drawPath( const Path& path, int color, bool thick )
     //skip clipped start pt
   }
   i++;
-  SDL_LockSurface(SURFACE(this));
+  SDL_LockSurface(m_surface);
   for ( ; i<n; i++ ) {
     // pt i-1 is guranteed to be inside clipping    
     const Vec2& p2 = path.point(i);
     if ( clip.contains( p2 ) ) {
       const Vec2& p1 = path.point(i-1);
-      switch ( SURFACE(this)->format->BytesPerPixel ) {
+      switch ( m_surface->format->BytesPerPixel ) {
       case 2:      
 	if ( thick ) {
-	  renderLine<Uint16,3>( SURFACE(this)->pixels,
-				SURFACE(this)->pitch,
+	  renderLine<Uint16,3>( m_surface->pixels,
+				m_surface->pitch,
 				p1.x, p1.y, p2.x, p2.y, color );
 	} else {
-	  renderLine<Uint16,1>( SURFACE(this)->pixels,
-				SURFACE(this)->pitch,
+	  renderLine<Uint16,1>( m_surface->pixels,
+				m_surface->pitch,
 				p1.x, p1.y, p2.x, p2.y, color );
 	}
 	break;
       case 4:
 	if ( thick ) {
-	  renderLine<Uint32,3>( SURFACE(this)->pixels,
-				SURFACE(this)->pitch,
+	  renderLine<Uint32,3>( m_surface->pixels,
+				m_surface->pitch,
 				p1.x, p1.y, p2.x, p2.y, color );
 	} else {
-	  renderLine<Uint32,1>( SURFACE(this)->pixels,
-				SURFACE(this)->pitch,
+	  renderLine<Uint32,1>( m_surface->pixels,
+				m_surface->pitch,
 				p1.x, p1.y, p2.x, p2.y, color );
 	}
 	break;
@@ -578,7 +576,7 @@ void Canvas::drawPath( const Path& path, int color, bool thick )
       }
     }
   }
-  SDL_UnlockSurface(SURFACE(this));
+  SDL_UnlockSurface(m_surface);
   
 }
 
@@ -588,14 +586,14 @@ void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill )
     Rect dest(x,y,x+w,y+h);
     dest.clipTo(m_clip);
     SDL_Rect r = make_SDL_Rect(dest.tl.x, dest.tl.y, dest.width(), dest.height());
-    SDL_FillRect( SURFACE(this), &r, c );
+    SDL_FillRect( m_surface, &r, c );
   } else {
     SDL_Rect f = make_SDL_Rect(x, y, w, h);
     SDL_Rect r;
-    r=f; r.h=1; SDL_FillRect( SURFACE(this), &r, c );
-    r.y+=f.h-1; SDL_FillRect( SURFACE(this), &r, c );
-    r=f; r.w=1; SDL_FillRect( SURFACE(this), &r, c );
-    r.x+=f.w-1; SDL_FillRect( SURFACE(this), &r, c );
+    r=f; r.h=1; SDL_FillRect( m_surface, &r, c );
+    r.y+=f.h-1; SDL_FillRect( m_surface, &r, c );
+    r=f; r.w=1; SDL_FillRect( m_surface, &r, c );
+    r.x+=f.w-1; SDL_FillRect( m_surface, &r, c );
   }
 }
 
@@ -629,7 +627,7 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
 			     w, h,
 			     SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
 
-  m_state = window;
+  m_surface = window;
 
   if ( window == NULL ) {
     throw "Unable to create window";
@@ -653,7 +651,7 @@ void Window::update( const Rect& r )
     int w  = std::max( 0, x2-x1 );
     int h  = std::max( 0, y2-y1 );
     if ( w > 0 && h > 0 ) {
-      SDL_UpdateRect( SURFACE(this), x1, y1, w, h );
+      SDL_UpdateRect( m_surface, x1, y1, w, h );
 #ifdef USE_HILDON
 #if MAEMO_VERSION >= 5
       static bool captured = false;
@@ -757,17 +755,17 @@ Image::Image( const char* file, bool alpha )
       SDL_SetColorKey( img,
  		       SDL_SRCCOLORKEY|SDL_RLEACCEL,
  		       img->format->colorkey );
-      m_state = SDL_DisplayFormatAlpha( img );
+      m_surface = SDL_DisplayFormatAlpha( img );
     } else {
-      m_state = SDL_DisplayFormat( img );
+      m_surface = SDL_DisplayFormat( img );
     }
-    if ( m_state ) {
+    if ( m_surface ) {
       SDL_FreeSurface( img );
     } else {
-      m_state = img;
+      m_surface = img;
     }
   } else {
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, 32, 32, 
+    m_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, 32, 32, 
 				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
 				    SDL_GetVideoInfo()->vfmt->Rmask,
 				    SDL_GetVideoInfo()->vfmt->Gmask,
@@ -816,7 +814,7 @@ int Canvas::writeBMP( const char* filename ) const
   FILE *f = fopen( filename, "wb" );
   if ( f ) {
     Uint32 bpp;
-    bpp = SURFACE(this)->format->BytesPerPixel;
+    bpp = m_surface->format->BytesPerPixel;
 
     fwrite( &head, 14, 1, f );
     fwrite( &info, 40, 1, f );

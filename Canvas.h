@@ -19,12 +19,12 @@
 
 #include "Common.h"
 #include <string>
+#include <SDL.h>
 
 class Path;
 
 class Canvas
 {
-  typedef void* State;
 public:
   Canvas( int w, int h );
   virtual ~Canvas();
@@ -50,8 +50,8 @@ public:
   void drawRect( const Rect& r, int c, bool fill=true );
   int writeBMP( const char* filename ) const;
 protected:
-  Canvas( State state=NULL );
-  State   m_state;
+  Canvas( SDL_Surface* state=NULL );
+  SDL_Surface*   m_surface;
   int     m_bgColour;
   Canvas* m_bgImage; 
   Rect    m_clip;
