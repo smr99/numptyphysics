@@ -614,48 +614,32 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
     snprintf(s,80,"SDL_VIDEO_X11_WMCLASS=%s",winclass);
     putenv(s);
   }
+  
+  int bpp = 32;
+  
 #ifdef USE_HILDON
-  m_state = SDL_SetVideoMode( w, h, 0, SDL_SWSURFACE|SDL_FULLSCREEN);
+  bpp = 0;
+  fullscreen = true;
   SDL_ShowCursor( SDL_DISABLE );
-#else
-  m_state = SDL_CreateWindow(title, 
+#endif
+  
+  SDL_Window *window = SDL_CreateWindow(title, 
 			     SDL_WINDOWPOS_UNDEFINED,
 			     SDL_WINDOWPOS_UNDEFINED,
 			     w, h,
 			     SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
 
-#endif
-  if ( SURFACE(this) == NULL ) {
-    throw "Unable to set video mode";
+  m_state = window;
+
+  if ( window == NULL ) {
+    throw "Unable to create window";
   }
   resetClip();
 
   memset(&(Swipe::m_syswminfo), 0, sizeof(SDL_SysWMinfo));
   SDL_VERSION(&(Swipe::m_syswminfo.version));
-  SDL_GetWMInfo(&(Swipe::m_syswminfo));
+  SDL_GetWindowWMInfo(window, &(Swipe::m_syswminfo));
   Swipe::lock(true);
-
-#ifdef USE_HILDON
-  SDL_SysWMinfo sys;
-  SDL_VERSION( &sys.version );
-  SDL_GetWMInfo( &sys );
-
-  uint32_t pid = getpid();
-  XChangeProperty( sys.info.x11.display,
-		   sys.info.x11.wmwindow,
-		   XInternAtom (sys.info.x11.display,
-				"_NET_WM_PID", False),
-		   XA_CARDINAL, 32, PropModeReplace,
-		   (unsigned char*)&pid, 1 );
-
-  // SDL_WM_SetCaption is broken on maemo4
-  XStoreName( sys.info.x11.display,
-	      sys.info.x11.wmwindow,
-	      title );
-  XStoreName( sys.info.x11.display,
-	      sys.info.x11.fswindow,
-	      title );
-#endif
 }
 
 
@@ -712,7 +696,7 @@ void Window::raise()
 {
   SDL_SysWMinfo sys;
   SDL_VERSION( &sys.version );
-  SDL_GetWMInfo( &sys );
+  SDL_GetWindowWMInfo( &sys );
 
 #if !defined(WIN32) && !(defined(__APPLE__) && defined(__MACH__))
   /* No X11 stuff on Windows and Mac OS X */

@@ -41,7 +41,7 @@ Event BasicEventMap::process(const SDL_Event& ev)
     break; }
   case SDL_KEYDOWN: {
     const KeyPair* inf = lookupKey(ev.key.keysym.sym);
-    if (inf) ret = Event(inf->ev, (char)ev.key.keysym.unicode);
+    if (inf) ret = Event(inf->ev, (char)ev.key.keysym.sym);
     break; }
   }
   return ret;
