@@ -50,7 +50,7 @@ public:
   void drawRect( const Rect& r, int c, bool fill=true );
   int writeBMP( const char* filename ) const;
 protected:
-  Canvas( SDL_Surface* state=NULL );
+  Canvas( SDL_Surface* surface=NULL );
   SDL_Surface*   m_surface;
   int     m_bgColour;
   Canvas* m_bgImage; 
@@ -63,9 +63,10 @@ class Window : public Canvas
   Window( int w, int h, const char* title=NULL, const char* winclass=NULL, bool fullscreen=false );
   void update( const Rect& r );
   void raise();
-  void setSubName( const char *sub );
  protected:
   std::string m_title;
+private:
+    SDL_Window* m_window;
 };
 
 

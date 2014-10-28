@@ -215,22 +215,8 @@ Canvas::Canvas( int w, int h )
     m_bgColour(0),
     m_bgImage(NULL)
 {
-  switch (SDL_GetVideoInfo()->vfmt->BitsPerPixel) {
-  case 16:
-  case 32:
-    m_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 
-				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
-				    SDL_GetVideoInfo()->vfmt->Rmask,
-				    SDL_GetVideoInfo()->vfmt->Gmask,
-				    SDL_GetVideoInfo()->vfmt->Bmask,
-				    SDL_GetVideoInfo()->vfmt->Amask );
-    break;
-  default:
-    // eg: dummy vid driver reports 8bpp
-    m_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 32,
+  m_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 32,
 				    0xFF0000, 0x00FF00, 0x0000FF, 0xFF000000 );
-    break;
-  }
   resetClip();
 }
 
@@ -612,31 +598,29 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
     snprintf(s,80,"SDL_VIDEO_X11_WMCLASS=%s",winclass);
     putenv(s);
   }
-  
-  int bpp = 32;
-  
+
 #ifdef USE_HILDON
-  bpp = 0;
   fullscreen = true;
   SDL_ShowCursor( SDL_DISABLE );
 #endif
   
-  SDL_Window *window = SDL_CreateWindow(title, 
+  // TODO: maybe use SDL_WINDOW_FULLSCREEN ?
+  m_window = SDL_CreateWindow(title, 
 			     SDL_WINDOWPOS_UNDEFINED,
 			     SDL_WINDOWPOS_UNDEFINED,
 			     w, h,
-			     SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
+			     SDL_SWSURFACE | ((fullscreen==true)?(SDL_WINDOW_FULLSCREEN):(0)));
 
-  m_surface = window;
+  m_surface = SDL_GetWindowSurface(m_window);
 
-  if ( window == NULL ) {
+  if ( m_window == NULL ) {
     throw "Unable to create window";
   }
   resetClip();
 
   memset(&(Swipe::m_syswminfo), 0, sizeof(SDL_SysWMinfo));
   SDL_VERSION(&(Swipe::m_syswminfo.version));
-  SDL_GetWindowWMInfo(window, &(Swipe::m_syswminfo));
+  SDL_GetWindowWMInfo(m_window, &(Swipe::m_syswminfo));
   Swipe::lock(true);
 }
 
@@ -692,52 +676,7 @@ void Window::update( const Rect& r )
 
 void Window::raise()
 {
-  SDL_SysWMinfo sys;
-  SDL_VERSION( &sys.version );
-  SDL_GetWindowWMInfo( &sys );
-
-#if !defined(WIN32) && !(defined(__APPLE__) && defined(__MACH__))
-  /* No X11 stuff on Windows and Mac OS X */
-
-  // take focus...
-  XEvent ev = { 0 };
-  ev.xclient.type         = ClientMessage;
-  ev.xclient.window       = sys.info.x11.wmwindow;
-  ev.xclient.message_type = XInternAtom (sys.info.x11.display,
-					 "_NET_ACTIVE_WINDOW", False);
-  ev.xclient.format       = 32;
-  //all xewv.xclient.data==0 -> older spec?
-  
-  XSendEvent (sys.info.x11.display,
-	      DefaultRootWindow(sys.info.x11.display),
-	      False,
-	      NoEventMask, //SubstructureRedirectMask,
-	      &ev);    
-  XSync( sys.info.x11.display, False );
-#endif
-  //XRaiseWindow( sys.info.x11.display, sys.info.x11.window );
-}
-
-
-void Window::setSubName( const char *sub )
-{
-#ifdef USE_HILDON
-  SDL_SysWMinfo sys;
-  SDL_VERSION( &sys.version );
-  SDL_GetWMInfo( &sys );
-
-  char title[128];
-  snprintf(title,128,"%s - %s\n",m_title.c_str(),sub);
-  title[127] = '\0';
-
-  // SDL_WM_SetCaption is broken on maemo4
-  XStoreName( sys.info.x11.display,
-	      sys.info.x11.wmwindow,
-	      title );
-  XStoreName( sys.info.x11.display,
-	      sys.info.x11.fswindow,
-	      title );
-#endif
+    SDL_RaiseWindow(m_window);
 }
 
 
