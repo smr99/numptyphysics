@@ -19,6 +19,7 @@
 #include "Config.h"
 #include "Canvas.h"
 #include "Path.h"
+#include <stdexcept>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -604,18 +605,12 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
   SDL_ShowCursor( SDL_DISABLE );
 #endif
   
-  // TODO: maybe use SDL_WINDOW_FULLSCREEN ?
-  m_window = SDL_CreateWindow(title, 
-			     SDL_WINDOWPOS_UNDEFINED,
-			     SDL_WINDOWPOS_UNDEFINED,
-			     w, h,
-			     SDL_SWSURFACE | ((fullscreen==true)?(SDL_WINDOW_FULLSCREEN):(0)));
-
+  int st = SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP, &m_window, &m_renderer);
+  if (st != 0 || m_window == NULL || m_renderer == NULL)
+      throw std::runtime_error("Failed to create window");
+  
   m_surface = SDL_GetWindowSurface(m_window);
 
-  if ( m_window == NULL ) {
-    throw "Unable to create window";
-  }
   resetClip();
 
   memset(&(Swipe::m_syswminfo), 0, sizeof(SDL_SysWMinfo));
@@ -635,7 +630,7 @@ void Window::update( const Rect& r )
     int w  = std::max( 0, x2-x1 );
     int h  = std::max( 0, y2-y1 );
     if ( w > 0 && h > 0 ) {
-      SDL_UpdateRect( m_surface, x1, y1, w, h );
+      SDL_RenderPresent(m_renderer);
 #ifdef USE_HILDON
 #if MAEMO_VERSION >= 5
       static bool captured = false;
@@ -690,26 +685,13 @@ Image::Image( const char* file, bool alpha )
     img = IMG_Load((f+file).c_str());
   }
   if ( img ) {
-    if ( alpha ) {
-      SDL_SetColorKey( img,
- 		       SDL_SRCCOLORKEY|SDL_RLEACCEL,
- 		       img->format->colorkey );
-      m_surface = SDL_DisplayFormatAlpha( img );
-    } else {
-      m_surface = SDL_DisplayFormat( img );
-    }
-    if ( m_surface ) {
-      SDL_FreeSurface( img );
-    } else {
-      m_surface = img;
-    }
+    m_surface = img;
   } else {
-    m_surface = SDL_CreateRGBSurface( SDL_SWSURFACE, 32, 32, 
-				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
-				    SDL_GetVideoInfo()->vfmt->Rmask,
-				    SDL_GetVideoInfo()->vfmt->Gmask,
-				    SDL_GetVideoInfo()->vfmt->Bmask,
-				    SDL_GetVideoInfo()->vfmt->Amask );
+    m_surface = SDL_CreateRGBSurface( 0, 32, 32, 32,
+				      0x00FF0000,
+                                      0x0000FF00,
+                                      0x000000FF,
+                                      0xFF000000);
     drawRect(0,0,32,32,0xff0000);
   }
   resetClip();

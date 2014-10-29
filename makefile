@@ -24,13 +24,10 @@ SOURCES_TEST = $(wildcard test/*.cpp)
 all: $(APP)
 
 # Required modules (uses pkg-config)
-PKGS = box2d sdl2 SDL2_image x11
+PKGS = box2d sdl2 SDL2_image SDL2_ttf x11 zlib
 
 CXXFLAGS += $(shell pkg-config --cflags $(PKGS))
 LIBS += $(shell pkg-config --libs $(PKGS))
-
-# No pkg-config module for SDL_ttf and zlib (on some systems)
-LIBS += -lSDL_ttf -lz
 
 	
 GTEST_DIR = /usr/src/gtest

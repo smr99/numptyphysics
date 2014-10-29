@@ -67,6 +67,7 @@ class Window : public Canvas
   std::string m_title;
 private:
     SDL_Window* m_window;
+    SDL_Renderer* m_renderer;
 };
 
 
