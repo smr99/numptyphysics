@@ -605,13 +605,17 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
   SDL_ShowCursor( SDL_DISABLE );
 #endif
   
-  int st = SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP, &m_window, &m_renderer);
+//  int st = SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP, &m_window, &m_renderer);
+  int st = SDL_CreateWindowAndRenderer(w, h, 0, &m_window, &m_renderer);
   if (st != 0 || m_window == NULL || m_renderer == NULL)
       throw std::runtime_error("Failed to create window");
   
   m_surface = SDL_GetWindowSurface(m_window);
 
   resetClip();
+  
+  SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+  SDL_RenderClear(m_renderer);
 
   memset(&(Swipe::m_syswminfo), 0, sizeof(SDL_SysWMinfo));
   SDL_VERSION(&(Swipe::m_syswminfo.version));
@@ -630,7 +634,8 @@ void Window::update( const Rect& r )
     int w  = std::max( 0, x2-x1 );
     int h  = std::max( 0, y2-y1 );
     if ( w > 0 && h > 0 ) {
-      SDL_RenderPresent(m_renderer);
+	// TODO: SDL_UpdateWindowSurfaceRects(m_window, NULL, 0);
+      SDL_UpdateWindowSurface(m_window);
 #ifdef USE_HILDON
 #if MAEMO_VERSION >= 5
       static bool captured = false;
