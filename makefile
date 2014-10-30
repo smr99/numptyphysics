@@ -83,8 +83,8 @@ install: $(APP)
 	mkdir -p $(DESTDIR)$(DESKTOPDIR)
 	install -m 644 $(APP).desktop $(DESTDIR)$(DESKTOPDIR)
 	mkdir -p $(DESTDIR)$(DATADIR)
-	cp -rpv data/*.png data/*.ttf data/*.npz $(DESTDIR)$(DATADIR)
-	cp -rpv data/NP-complete $(DESTDIR)$(DATADIR)
+	install -m 644 data/*.png data/*.ttf data/*.npz $(DESTDIR)$(DATADIR)
+	install -m 644 data/NP-complete/*/*.npz $(DESTDIR)$(DATADIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man6
 	install -m 644 $(APP).6 $(DESTDIR)$(MANDIR)/man6
 	mkdir -p $(DESTDIR)$(PIXMAPDIR)
