@@ -146,9 +146,9 @@ private:
   {
     configureScreenTransform( width, height );
 
-    Levels* levels = new Levels();
-    levels->addPath( file );
-    add( createGameLayer( levels, width, height ) );
+    Levels levels;
+    levels.addPath( file );
+    add( createGameLayer( &levels, width, height ) );
 
     Rect area(0,0,width,height);
     Canvas canvas(width,height);
@@ -169,23 +169,23 @@ private:
 
   void runGame( Array<const char*>& files, int width, int height )
   {
-    Levels* levels = new Levels();
+    Levels levels;
     
     if ( files.size() > 0 ) {
       for ( int i=0; i<files.size(); i++ ) {
-	levels->addPath( files[i] );
+	levels.addPath( files[i] );
       }
     } else {
       struct stat st;
       if ( stat("Game.cpp",&st)==0 ) {
-	levels->addPath( "data" );
+	levels.addPath( "data" );
       } else {
-	levels->addPath( DEFAULT_LEVEL_PATH );
+	levels.addPath( DEFAULT_LEVEL_PATH );
       }
-      levels->addPath( Config::userDataDir().c_str() );
+      levels.addPath( Config::userDataDir().c_str() );
     }
         
-    add( createGameLayer( levels, width, height ), 0, 0 );
+    add( createGameLayer( &levels, width, height ), 0, 0 );
     mainLoop();
   }
 
