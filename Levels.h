@@ -24,7 +24,7 @@ class Levels
 {
  public:
   Levels( int numDirs=0, const char** dirs=NULL );
-  bool addPath( const char* path );
+  void addPath( const char* path );
   bool addLevel( const std::string& file, int rank=-1, int index=-1 );
   int  numLevels() const;
   int load( int i, unsigned char* buf, int bufLen );

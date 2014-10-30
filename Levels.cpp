@@ -93,7 +93,7 @@ Levels::Levels( int numFiles, const char** names )
   }
 }
 
-bool Levels::addPath( const char* path )
+void Levels::addPath( const char* path )
 {
   int len = strlen( path );
   if ( strcasecmp( path+len-4, ".npz" )==0 ) {
@@ -117,7 +117,6 @@ bool Levels::addPath( const char* path )
       closedir( dir );
     }
   }
-  return true;
 }
 
 bool Levels::addLevel( const string& file, int rank, int index )
