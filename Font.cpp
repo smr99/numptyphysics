@@ -47,6 +47,9 @@ Vec2 Font::metrics( const std::string& text ) const
 void Font::drawLeft( Canvas* canvas, Vec2 pt,
 		     const std::string& text, int colour ) const
 {
+  if (text.empty())
+      return;
+    
   SDL_Color fg = { static_cast<Uint8>(colour>>16), static_cast<Uint8>(colour>>8), static_cast<Uint8>(colour) };
   FontCanvas temp( TTF_RenderText_Blended( m_ttf_font,
 					   text.c_str(),
