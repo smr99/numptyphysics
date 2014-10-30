@@ -629,23 +629,15 @@ public:
 };
 
 ScrollArea::ScrollArea()
-  : m_canvas(NULL)
 {
   m_contents = new ScrollContents();
   m_contents->step(Vec2(0,5));
   Container::add(m_contents,0,0);
 }
-  
 
 bool ScrollArea::onEvent( Event& ev )
 {
   return Panel::onEvent(ev);
-}
-
-void ScrollArea::onResize()
-{
-  delete m_canvas;
-  m_canvas = new Canvas(m_pos.size().x, m_pos.size().y);
 }
 
 void ScrollArea::virtualSize( const Vec2& size )

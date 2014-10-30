@@ -278,7 +278,7 @@ class ScrollArea : public Panel
   ScrollArea();
   const char* name() {return "ScrollArea";}
   bool onEvent( Event& ev );
-  virtual void onResize();
+  virtual void onResize() {}
   virtual void draw( Canvas& screen, const Rect& area );
   virtual void add( Widget* w, int x=-9999, int y=-9999 );
   using WidgetParent::add;
@@ -287,7 +287,6 @@ class ScrollArea : public Panel
 
   virtual void virtualSize( const Vec2& size );
  protected:
-  Canvas* m_canvas;
   Draggable* m_contents;
 };
 
