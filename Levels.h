@@ -17,9 +17,8 @@
 #ifndef LEVELS_H
 #define LEVELS_H
 
-#include <cstdio>
-#include <sstream>
 #include "Array.h"
+#include <string>
 
 class Levels
 {
