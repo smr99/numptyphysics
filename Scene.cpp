@@ -551,10 +551,6 @@ void Scene::resetWorld()
   const b2Vec2 gravity(0.0f, GRAVITY_ACCELf*PIXELS_PER_METREf/GRAVITY_FUDGEf);
   delete m_world;
 
-  b2AABB worldAABB;
-  worldAABB.lowerBound.Set(-100.0f, -100.0f);
-  worldAABB.upperBound.Set(100.0f, 100.0f);
-    
   m_world = new b2World(gravity);
   m_world->SetAllowSleeping(true);
   m_world->SetContactListener( this );
