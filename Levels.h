@@ -26,20 +26,30 @@ class Levels
   Levels( int numDirs=0, const char** dirs=NULL );
   bool addPath( const char* path );
   bool addLevel( const std::string& file, int rank=-1, int index=-1 );
-  int  numLevels();
+  int  numLevels() const;
   int load( int i, unsigned char* buf, int bufLen );
-  std::string levelName( int i, bool pretty=true );
-  int findLevel( const char *file );
+  
+  std::string levelName( int i, bool pretty=true ) const;
+  
+  /// @return level index corresponding to file; negative if file not found
+  int findLevel( const char *file ) const;
 
-  int  numCollections();
-  int  collectionFromLevel( int l, int *indexInCol=NULL );
-  std::string collectionName( int i, bool pretty=true );
-  int  collectionSize(int c);
-  int  collectionLevel(int c, int i);
+  int  numCollections() const;
+  
+  /// @return collection index given level index; negative if level not found
+  int  collectionFromLevel( int l, int *indexInCol=NULL ) const;
+  
+  std::string collectionName( int i, bool pretty=true ) const;
+  
+  /// @return number of levels in given collection
+  int  collectionSize(int c) const;
+  
+  /// @return level of collection c, file i
+  int  collectionLevel(int c, int i) const;
 
-  std::string demoPath(int l);
-  std::string demoName(int l);
-  bool hasDemo(int l);
+  std::string demoPath(int l) const;
+  std::string demoName(int l) const;
+  bool hasDemo(int l) const;
 
  private:
 
@@ -62,7 +72,7 @@ class Levels
 
   bool addLevel( Collection* collection,
 		 const std::string& file, int rank, int index );
-  LevelDesc* findLevel( int i );
+  LevelDesc* findLevel( int i ) const;
   Collection* getCollection( const std::string& file );
   bool scanCollection( const std::string& file, int rank );
 

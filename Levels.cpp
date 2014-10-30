@@ -28,6 +28,13 @@ using namespace std;
 static const char MISC_COLLECTION[] = "My Levels";
 static const char DEMO_COLLECTION[] = "My Solutions";
 
+
+inline bool ends_with(const std::string& str, const std::string& suffix)
+{
+    return str.size() >= suffix.size()
+	&& std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
+}
+
 static int rankFromPath( const string& p, int defaultrank=9999 )
 {
   if (p==MISC_COLLECTION) {
@@ -115,7 +122,7 @@ bool Levels::addPath( const char* path )
 
 bool Levels::addLevel( const string& file, int rank, int index )
 {
-  if (file.substr(file.length()-4) == ".npd") {
+  if (ends_with(file, ".npd")) {
     return addLevel( getCollection(DEMO_COLLECTION), file, rank, index );
   } else {
     return addLevel( getCollection(MISC_COLLECTION), file, rank, index );
@@ -174,7 +181,7 @@ bool Levels::scanCollection( const std::string& file, int rank )
   return false;
 }
 
-int Levels::numLevels()
+int Levels::numLevels() const
 {
   return m_numLevels;
 }
@@ -208,7 +215,7 @@ int Levels::load( int i, unsigned char* buf, int bufLen )
   throw "invalid level index";  
 }
 
-std::string Levels::levelName( int i, bool pretty )
+std::string Levels::levelName( int i, bool pretty ) const
 {
   std::string s = "end";
   LevelDesc *lev = findLevel(i);
@@ -226,12 +233,12 @@ std::string Levels::levelName( int i, bool pretty )
 }
 
 
-int Levels::numCollections()
+int Levels::numCollections() const
 {
   return m_collections.size();
 }
 
-int Levels::collectionFromLevel( int i, int *indexInCol )
+int Levels::collectionFromLevel( int i, int *indexInCol ) const
 {
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {
@@ -246,7 +253,7 @@ int Levels::collectionFromLevel( int i, int *indexInCol )
   return -1;
 }
 
-std::string Levels::collectionName( int i, bool pretty )
+std::string Levels::collectionName( int i, bool pretty ) const
 {
   if (i>=0 && i<numCollections()) {
     if (pretty) {
@@ -259,7 +266,7 @@ std::string Levels::collectionName( int i, bool pretty )
 }
 
 
-int Levels::collectionSize(int c)
+int Levels::collectionSize(int c) const
 {
   if (c>=0 && c<numCollections()) {
     return m_collections[c]->levels.size();
@@ -267,7 +274,7 @@ int Levels::collectionSize(int c)
   return 0;
 }
 
-int Levels::collectionLevel(int c, int i)
+int Levels::collectionLevel(int c, int i) const
 {
   if (c>=0 && c<numCollections()) {
     if (i>=0 && i<m_collections[c]->levels.size()) {
@@ -281,11 +288,10 @@ int Levels::collectionLevel(int c, int i)
   return 0;
 }
 
-
-std::string Levels::demoPath(int l)
+std::string Levels::demoPath(int l) const
 {
   std::string name = levelName(l,false);
-  if (name.substr(name.length()-4) == ".npd") {
+  if (ends_with(name, ".npd")) {
     /* Kludge: If the level from which we want to save a demo is
      * already a demo file, return an empty string to signal
      * "don't have this demo" - see Game.cpp */
@@ -296,32 +302,32 @@ std::string Levels::demoPath(int l)
   std::string path = Config::userDataDir() + Os::pathSep
     + "Recordings" + Os::pathSep
     + collectionName(c,false);
-  if (path.substr(path.length()-4) == ".npz") {
+  if (ends_with(path, ".npz")) {
     path.resize(path.length()-4);
   }
   return path;
 }
 
-std::string Levels::demoName(int l)
+std::string Levels::demoName(int l) const
 {
   std::string name = levelName(l,false);
   size_t sep = name.rfind(Os::pathSep);
   if (sep != std::string::npos) {
     name = name.substr(sep);
   }
-  if (name.substr(name.length()-4) == ".nph") {
+  if (ends_with(name, ".nph")) {
     name.resize(name.length()-4);
   }
   return demoPath(l) + Os::pathSep + name + ".npd";
 }
 
-bool Levels::hasDemo(int l)
+bool Levels::hasDemo(int l) const
 {
   return OS->exists(demoName(l));
 }
 
 
-Levels::LevelDesc* Levels::findLevel( int i )
+Levels::LevelDesc* Levels::findLevel( int i ) const
 {
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {
@@ -336,7 +342,7 @@ Levels::LevelDesc* Levels::findLevel( int i )
 }
 
 
-int Levels::findLevel( const char *file )
+int Levels::findLevel( const char *file ) const
 {
   int index = 0;
   for ( int c=0; c<m_collections.size(); c++ ) {
