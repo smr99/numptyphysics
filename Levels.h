@@ -19,14 +19,22 @@
 
 #include "Array.h"
 #include <string>
+#include <vector>
 
 class Levels
 {
  public:
   Levels( int numDirs=0, const char** dirs=NULL );
+  
+  /// Add levels specified by the given path
+  /// Path may be a level file, level collection file, or a directory.
+  /// If a directory, all entries are recursively evaluated by addPath.
   void addPath( const char* path );
-  bool addLevel( const std::string& file, int rank=-1, int index=-1 );
+  
   int  numLevels() const;
+  
+  /// Load contents of level file into specified buffer
+  /// @return number bytes read
   int load( int i, unsigned char* buf, int bufLen );
   
   std::string levelName( int i, bool pretty=true ) const;
@@ -34,18 +42,18 @@ class Levels
   /// @return level index corresponding to file; negative if file not found
   int findLevel( const char *file ) const;
 
-  int  numCollections() const;
+  unsigned int  numCollections() const;
   
   /// @return collection index given level index; negative if level not found
-  int  collectionFromLevel( int l, int *indexInCol=NULL ) const;
+  int  collectionFromLevel( unsigned int l, int *indexInCol=NULL ) const;
   
   std::string collectionName( int i, bool pretty=true ) const;
   
   /// @return number of levels in given collection
-  int  collectionSize(int c) const;
+  int  collectionSize(unsigned c) const;
   
   /// @return level of collection c, file i
-  int  collectionLevel(int c, int i) const;
+  int  collectionLevel(unsigned int c, unsigned int i) const;
 
   std::string demoPath(int l) const;
   std::string demoName(int l) const;
@@ -67,16 +75,17 @@ class Levels
     std::string file;
     std::string name;
     int rank;
-    Array<LevelDesc*> levels;
+    std::vector<LevelDesc> levels;
   };
 
+  bool addLevel( const std::string& file, int rank=-1, int index=-1 );
   bool addLevel( Collection* collection,
 		 const std::string& file, int rank, int index );
-  LevelDesc* findLevel( int i ) const;
+  LevelDesc* findLevel( unsigned int i ) const;
   Collection* getCollection( const std::string& file );
   bool scanCollection( const std::string& file, int rank );
 
-  int m_numLevels;
+  unsigned int m_numLevels;
   Array<Collection*> m_collections;
 };
 

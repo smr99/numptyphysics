@@ -115,7 +115,7 @@ public:
   }
   void setCollection(int c, int levelInC)
   {
-    if (c < 0 || c >=m_levels->numCollections()) {
+    if (c < 0 || static_cast<unsigned int>(c) >=m_levels->numCollections()) {
       return;
     }    
     m_collection = c;

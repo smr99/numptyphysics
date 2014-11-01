@@ -17,6 +17,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <dirent.h>
+#include <stdexcept>
 
 #include "Levels.h"
 #include "ZipFile.h"
@@ -131,18 +132,16 @@ bool Levels::addLevel( const string& file, int rank, int index )
 bool Levels::addLevel( Collection* collection,
 		       const string& file, int rank, int index )
 {
-  LevelDesc *e = new LevelDesc( file, rank, index );
-  for ( int i=0; i<collection->levels.size(); i++ ) {
-    if ( collection->levels[i]->file == file
-	 && collection->levels[i]->index == index ) {
-      return false;
-    } else if ( collection->levels[i]->rank > rank ) {
-      collection->levels.insert(i,e);
-      m_numLevels++;
-      return true;
-    }
+  vector<LevelDesc>::iterator it = collection->levels.begin();
+  for( ; it != collection->levels.end(); ++it)
+  {
+      if (it->file == file && it->index == index)
+	  return false;
+      if (it->rank > rank)
+	  break;
   }
-  collection->levels.append( e );
+
+  collection->levels.insert(it, LevelDesc(file, rank, index));
   m_numLevels++;
   return true;
 }
@@ -211,7 +210,7 @@ int Levels::load( int i, unsigned char* buf, int bufLen )
     return l;
   }
 
-  throw "invalid level index";  
+  throw std::invalid_argument("invalid level index");
 }
 
 std::string Levels::levelName( int i, bool pretty ) const
@@ -232,12 +231,12 @@ std::string Levels::levelName( int i, bool pretty ) const
 }
 
 
-int Levels::numCollections() const
+unsigned int Levels::numCollections() const
 {
   return m_collections.size();
 }
 
-int Levels::collectionFromLevel( int i, int *indexInCol ) const
+int Levels::collectionFromLevel( unsigned int i, int *indexInCol ) const
 {
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {
@@ -254,7 +253,7 @@ int Levels::collectionFromLevel( int i, int *indexInCol ) const
 
 std::string Levels::collectionName( int i, bool pretty ) const
 {
-  if (i>=0 && i<numCollections()) {
+  if (i>=0 && static_cast<unsigned int>(i) < numCollections()) {
     if (pretty) {
       return nameFromPath(m_collections[i]->name);
     } else {
@@ -265,7 +264,7 @@ std::string Levels::collectionName( int i, bool pretty ) const
 }
 
 
-int Levels::collectionSize(int c) const
+int Levels::collectionSize(unsigned c) const
 {
   if (c>=0 && c<numCollections()) {
     return m_collections[c]->levels.size();
@@ -273,12 +272,12 @@ int Levels::collectionSize(int c) const
   return 0;
 }
 
-int Levels::collectionLevel(int c, int i) const
+int Levels::collectionLevel(unsigned int c, unsigned int i) const
 {
   if (c>=0 && c<numCollections()) {
     if (i>=0 && i<m_collections[c]->levels.size()) {
       int l = i;
-      for (int j=0; j<c; j++) {
+      for (unsigned int j=0; j<c; j++) {
 	l += m_collections[j]->levels.size();
       }
       return l;
@@ -326,14 +325,14 @@ bool Levels::hasDemo(int l) const
 }
 
 
-Levels::LevelDesc* Levels::findLevel( int i ) const
+Levels::LevelDesc* Levels::findLevel( unsigned int i ) const
 {
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {
       if ( i >= m_collections[c]->levels.size() ) {
 	i -= m_collections[c]->levels.size();
       } else {
-	return m_collections[c]->levels[i];
+	return &m_collections[c]->levels[i];
       }
     }
   }
@@ -345,8 +344,8 @@ int Levels::findLevel( const char *file ) const
 {
   int index = 0;
   for ( int c=0; c<m_collections.size(); c++ ) {
-    for ( int i=0; i<m_collections[c]->levels.size(); i++ ) {
-      if ( m_collections[c]->levels[i]->file == file ) {
+    for ( unsigned i=0; i<m_collections[c]->levels.size(); i++ ) {
+      if ( m_collections[c]->levels[i].file == file ) {
 	return index + i;
       }
     }
