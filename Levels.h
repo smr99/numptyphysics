@@ -17,7 +17,6 @@
 #ifndef LEVELS_H
 #define LEVELS_H
 
-#include "Array.h"
 #include <string>
 #include <vector>
 
@@ -79,14 +78,14 @@ class Levels
   };
 
   bool addLevel( const std::string& file, int rank=-1, int index=-1 );
-  bool addLevel( Collection* collection,
+  bool addLevel( Collection& collection,
 		 const std::string& file, int rank, int index );
-  LevelDesc* findLevel( unsigned int i ) const;
-  Collection* getCollection( const std::string& file );
+  const LevelDesc* findLevel( unsigned int i ) const;
+  Collection& getCollection( const std::string& file );
   bool scanCollection( const std::string& file, int rank );
 
   unsigned int m_numLevels;
-  Array<Collection*> m_collections;
+  std::vector<Collection> m_collections;
 };
 
 #endif //LEVELS_H
