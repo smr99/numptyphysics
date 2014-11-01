@@ -206,7 +206,7 @@ public:
     s << ":";
     Path opath = m_rawPath;
     opath.translate(m_origin);
-    for ( int i=0; i<opath.size(); i++ ) {
+    for ( unsigned i=0; i<opath.size(); i++ ) {
       const Vec2& p = opath.point(i);
       s <<' '<< p.x << ',' << p.y; 
     }

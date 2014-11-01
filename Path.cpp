@@ -53,9 +53,9 @@ float32 Segment::distanceTo( const Vec2& p )
 }
 
 
-Path::Path() : Array<Vec2>() {}
+Path::Path() {}
 
-Path::Path( int n, Vec2* p ) : Array<Vec2>(n, p) {}
+Path::Path( int n, Vec2* p ) : std::vector<Vec2>(n, *p) {}
 
 Path::Path( const char *s )
 {
@@ -76,7 +76,7 @@ void Path::makeRelative()
 
 Path& Path::translate(const Vec2& xlate) 
 {
-  for (int i=0;i<size();i++)
+  for (unsigned i=0;i<size();i++)
     at(i) += xlate; 
   return *this;
 }
@@ -88,7 +88,7 @@ Path& Path::rotate(const b2Mat22& rot)
   float32 j2 = rot.ey.x;
   float32 k2 = rot.ey.y;
 
-  for (int i=0;i<size();i++) {
+  for (unsigned i=0;i<size();i++) {
     at(i) = Vec2( j1 * at(i).x + j2 * at(i).y,
 		  k1 * at(i).x + k2 * at(i).y );
   }
@@ -102,7 +102,7 @@ Path& Path::rotate(const b2Rot& rot)
   float32 j2 = -rot.s;
   float32 k2 = rot.c;
 
-  for (int i=0;i<size();i++) {
+  for (unsigned i=0;i<size();i++) {
     at(i) = Vec2( j1 * at(i).x + j2 * at(i).y,
 		  k1 * at(i).x + k2 * at(i).y );
   }
@@ -111,7 +111,7 @@ Path& Path::rotate(const b2Rot& rot)
 
 Path& Path::scale(float32 factor)
 {
-  for (int i=0;i<size();i++) {
+  for (unsigned i=0;i<size();i++) {
     at(i).x = at(i).x * factor;
     at(i).y = at(i).y * factor;
   }
@@ -127,7 +127,7 @@ void Path::simplify( float32 threshold )
   simplifySub( 0, size()-1, threshold, &keepflags[0] );
 
   int k=0;
-  for ( int i=0; i<size(); i++ ) {
+  for ( unsigned  i=0; i<size(); i++ ) {
     if ( keepflags[i] ) {
       at(k++) = at(i);
     }
@@ -166,7 +166,7 @@ void Path::simplifySub( int first, int last, float32 threshold, bool* keepflags 
 Rect Path::bbox() const
 {
   Rect r( at(0), at(0) );
-  for ( int i=1; i<size(); i++ ) {
+  for ( unsigned i=1; i<size(); i++ ) {
     r.expand( at(i) );
   }
   return r;
