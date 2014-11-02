@@ -77,7 +77,7 @@ class Array
     return m_data[i];
   }
 
-  void append( const T& t )
+  void push_back( const T& t )
   {
     ensureCapacity( m_size + 1 );
     m_data[ m_size++ ] = t;
@@ -86,7 +86,7 @@ class Array
   void insert( int i, const T& t )
   {
     if ( i==m_size ) {
-      append( t );
+      push_back( t );
     } else {
       ASSERT( i < m_size );
       ensureCapacity( m_size + 1 );

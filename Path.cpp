@@ -61,7 +61,7 @@ Path::Path( const char *s )
 {
   float32 x,y;      
   while ( sscanf( s, "%f,%f", &x, &y )==2) {
-    append( Vec2((int)x,(int)y) );
+    push_back( Vec2((int)x,(int)y) );
     while ( *s && *s!=' ' && *s!='\t' ) s++;
     while ( *s==' ' || *s=='\t' ) s++;
   }

@@ -286,7 +286,7 @@ public:
       if ( !m_jointed[end] ) {
 	const Vec2& p = m_xformedPath.endpt(end);
 	if ( other->distanceTo( p ) <= JOINT_TOLERANCE ) {
-	  joints.append( Joint(this,other,end) );
+	  joints.push_back( Joint(this,other,end) );
 	}
       }
     }
@@ -362,7 +362,7 @@ public:
     Vec2 p = pp; p -= m_origin;
     if ( p == m_rawPath.point( m_rawPath.numPoints()-1 ) ) {
     } else {
-      m_rawPath.append( p );
+      m_rawPath.push_back( p );
       m_drawn = false;
     }
   }
@@ -566,7 +566,7 @@ Stroke* Scene::newStroke( const Path& p, int colour, int attribs ) {
   case 1: s->setAttribute( ATTRIB_GOAL ); break;
   default: s->setColour( brushColours[colour] ); break;
   }
-  m_strokes.append( s );
+  m_strokes.push_back( s );
   m_recorder.newStroke( p, colour, attribs );
   return s;
 }
@@ -577,7 +577,7 @@ bool Scene::deleteStroke( Stroke *s ) {
     if ( i >= m_protect ) {
 	reset(s);
 	m_strokes.erase( i );
-	m_deletedStrokes.append( s );
+	m_deletedStrokes.push_back( s );
 	m_recorder.deleteStroke( i );
 	return true;
     }
@@ -627,7 +627,7 @@ void Scene::getJointCandidates( Stroke* s, Path& pts )
     }
   }
   for ( int j=joints.size()-1; j>=0; j-- ) {
-    pts.append( joints[j].joiner->endpt(joints[j].end) );
+    pts.push_back( joints[j].joiner->endpt(joints[j].end) );
   }
 }
 
@@ -931,7 +931,7 @@ bool Scene::parseLine( const std::string& line )
     case 'T': m_title = line.substr(line.find(':')+1);  return true;
     case 'B': m_bg = line.substr(line.find(':')+1);     return true;
     case 'A': m_author = line.substr(line.find(':')+1); return true;
-    case 'S': m_strokes.append( new Stroke(line) );     return true;
+    case 'S': m_strokes.push_back( new Stroke(line) );     return true;
     case 'G': setGravity(line);                         return true;
     case 'E': m_log.append(line.substr(line.find(':')+1));return true;
     }

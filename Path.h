@@ -49,13 +49,13 @@ public:
 
   inline Path& operator&(const Vec2& other) 
   {
-    append(other);
+    push_back(other);
     return *this; 
   }
   
   inline Path& operator&(const b2Vec2& other) 
   {
-    append(Vec2(other));
+    push_back(Vec2(other));
     return *this; 
   }
   

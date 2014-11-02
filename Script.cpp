@@ -64,12 +64,12 @@ std::string ScriptLog::asString( int i )
 void ScriptLog::append( int tick, ScriptEntry::Op op, int stroke, 
 		      int arg1, int arg2, const Vec2& pt )
 {
-  append( ScriptEntry( tick, op, stroke, arg1, arg2, pt ) );
+  push_back( ScriptEntry( tick, op, stroke, arg1, arg2, pt ) );
 }
 
 void ScriptLog::append( const std::string& str ) 
 {
-  append( ScriptEntry(str) );
+  push_back( ScriptEntry(str) );
 }
 
 

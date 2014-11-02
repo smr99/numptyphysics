@@ -404,7 +404,7 @@ int RichText::layout(int w)
   Snippet snippet = {Vec2(x,y),0,0,0,m_font};
   Vec2 wordmetrics;
   m_snippets.clear();
-  m_snippets.append(snippet);
+  m_snippets.push_back(snippet);
 
   while (p != std::string::npos) {
     bool newline = false;
@@ -472,7 +472,7 @@ int RichText::layout(int w)
 	m_snippets[l].textlen = len > 0 ? len : 0;
 	m_snippets[l].pos.y = y;
 	snippet.textoff = e;
-	m_snippets.append(snippet);
+	m_snippets.push_back(snippet);
 	y += m_snippets[l].font->height();
 	l++;
 	x = margin + indent;
@@ -810,7 +810,7 @@ void Container::add( Widget* w, int x, int y )
     w->moveTo(pos);
   }
   w->setParent(this);
-  m_children.append(w);
+  m_children.push_back(w);
   onResize();
   dirty();
 }
@@ -872,8 +872,8 @@ void Box::onResize()
 void Box::add( Widget* w, int dim, int grow )
 {
   Panel::add(w,0,0);
-  m_sizes.append(dim);
-  m_growths.append(grow);
+  m_sizes.push_back(dim);
+  m_growths.push_back(grow);
   onResize();
 }
 
@@ -892,7 +892,7 @@ void Box::remove( Widget* w )
 void Menu::addItems(const MenuItem* item)
 {
   while (item && item->event.code != Event::NOP) {
-    m_items.append(new MenuItem(item->text,item->event));
+    m_items.push_back(new MenuItem(item->text,item->event));
     item++;
   }
   layout();
@@ -900,7 +900,7 @@ void Menu::addItems(const MenuItem* item)
 
 void Menu::addItem(const MenuItem& item)
 {
-  m_items.append(new MenuItem(item.text,item.event));
+  m_items.push_back(new MenuItem(item.text,item.event));
   layout();
 }
 
@@ -956,8 +956,8 @@ void TabBook::addTab( const std::string &s, Widget* w )
   Widget* tab = new Button(s,Event(Event::SELECT,m_count,-1));
   add( tab, Rect(m_count*TAB_WIDTH,0,
 		 (m_count+1)*TAB_WIDTH,TAB_HEIGHT) );
-  m_tabs.append(tab);
-  m_panels.append(w);
+  m_tabs.push_back(tab);
+  m_panels.push_back(w);
   m_count++;
   if ( m_selected < 0 ) {
     selectTab(m_count-1);

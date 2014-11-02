@@ -78,7 +78,7 @@ public:
 	}
 	i++;
       } else {
-	m_files.append( argv[i] );
+	m_files.push_back( argv[i] );
       }
     }
     init();

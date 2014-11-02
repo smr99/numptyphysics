@@ -57,7 +57,7 @@ public:
   void append( int tick, ScriptEntry::Op op, int stroke=-1,
 	       int arg1=-1, int arg2=-1, const Vec2& pt=Vec2(-1,-1) );
   void append( const std::string& str );
-  using Array<ScriptEntry>::append;
+  using Array<ScriptEntry>::push_back;
 };
 
 

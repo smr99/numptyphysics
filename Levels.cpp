@@ -142,7 +142,7 @@ bool Levels::addLevel( Collection* collection,
       return true;
     }
   }
-  collection->levels.append( e );
+  collection->levels.push_back( e );
   m_numLevels++;
   return true;
 }
@@ -165,7 +165,7 @@ Levels::Collection* Levels::getCollection( const std::string& file )
       return c;
     }
   }
-  m_collections.append(c);
+  m_collections.push_back(c);
   return c;
 }
 

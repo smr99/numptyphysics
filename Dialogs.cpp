@@ -499,7 +499,7 @@ public:
     std::string label = item->text.substr(0,item->text.find(':')); 
     IconButton *w = new IconButton(label,file,ev);
     w->align(1);
-    m_opts.append(w);
+    m_opts.push_back(w);
     return w;
   }
   void empty()
