@@ -44,7 +44,7 @@ public:
   Path& rotate(const b2Rot& rot);
   Path& scale(float32 factor);
 
-  inline Vec2& origin() { return at(0); }
+  inline const Vec2& origin() const { return at(0); }
   
   inline void append(Vec2 v)
   {
