@@ -11,12 +11,6 @@ TEST(Path, constructor_trivial)
     Path p;
 }
 
-TEST(Path, constructor_vector)
-{
-    Vec2 v;
-    Path p(1, &v);
-}
-
 TEST(Path, constructor_string)
 {
     Path p("0,0 5,0 5,5 0,5");
