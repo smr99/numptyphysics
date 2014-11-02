@@ -45,7 +45,7 @@ public:
   Path& rotate(const b2Rot& rot);
   Path& scale(float32 factor);
 
-  inline Vec2& origin() { return at(0); }
+  inline const Vec2& origin() const { return at(0); }
 
   inline Path& operator&(const Vec2& other) 
   {
