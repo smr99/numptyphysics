@@ -403,7 +403,7 @@ int RichText::layout(int w)
   int spacewidth = m_font->metrics(" ").x;
   Snippet snippet = {Vec2(x,y),0,0,0,m_font};
   Vec2 wordmetrics;
-  m_snippets.empty();
+  m_snippets.clear();
   m_snippets.append(snippet);
 
   while (p != std::string::npos) {

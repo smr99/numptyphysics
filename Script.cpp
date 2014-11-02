@@ -86,7 +86,7 @@ void ScriptRecorder::start( ScriptLog* log )
   m_running = true;
   m_isPaused = false;
   m_log = log;
-  m_log->empty();
+  m_log->clear();
   m_log->capacity(128);
   m_lastTick = 0;
 }

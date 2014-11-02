@@ -635,7 +635,7 @@ void Scene::createJoints( Stroke *s )
       for ( int i=0; i<joints.size(); i++ ) {
 	joints[i].joiner->join( m_world, joints[i].joinee, joints[i].end );
       }
-      joints.empty();
+      joints.clear();
     }
   }    
 }
@@ -817,7 +817,7 @@ void Scene::clear()
     //step is required to actually destroy bodies and joints
     m_world->Step( ITERATION_TIMESTEPf, VELOCITY_ITERATIONS, POSITION_ITERATIONS );
   }
-  m_log.empty();
+  m_log.clear();
 }
 
 void Scene::setGravity( const b2Vec2& g )

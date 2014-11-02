@@ -273,7 +273,7 @@ public:
   virtual Rect dirtyArea() 
   {
     //todo include dirt  for old joint candidates
-    m_jointCandidates.empty();
+    m_jointCandidates.clear();
     if ( m_refresh  ) {
       if ( m_createStroke ) {
 	//this messes up dirty calc so do _after_ dirty area eval.
