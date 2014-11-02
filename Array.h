@@ -60,7 +60,7 @@ class Array
     return m_size;
   }
 
-  void empty()
+  void clear()
   {
     m_size = 0;
   }

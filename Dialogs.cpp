@@ -504,7 +504,7 @@ public:
   }
   void empty()
   {
-    m_opts.empty();
+    m_opts.clear();
   }
   void remove( Widget* w )
   {
