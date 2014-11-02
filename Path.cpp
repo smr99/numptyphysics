@@ -55,8 +55,6 @@ float32 Segment::distanceTo( const Vec2& p )
 
 Path::Path() {}
 
-Path::Path( int n, Vec2* p ) : std::vector<Vec2>(n, *p) {}
-
 Path::Path( const char *s )
 {
   float32 x,y;      

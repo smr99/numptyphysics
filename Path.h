@@ -36,7 +36,6 @@ class Path : public std::vector<Vec2>
 {
 public:
   Path();
-  Path( int n, Vec2* p );
   Path( const char *ptlist );
 
   void makeRelative();
