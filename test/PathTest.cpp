@@ -44,6 +44,22 @@ TEST(Path, constructor_copy)
     ASSERT_NE(&p[3], &q[3]);   
 }
 
+TEST(Path, copy_operator)
+{
+    Path p("0,0 5,0 5,5 0,5");
+    Path q = p;
+    
+    ASSERT_EQ(Vec2(0,0), q[0]);
+    ASSERT_EQ(Vec2(5,0), q[1]);
+    ASSERT_EQ(Vec2(5,5), q[2]);
+    ASSERT_EQ(Vec2(0,5), q[3]);
+
+    ASSERT_NE(&p[0], &q[0]);
+    ASSERT_NE(&p[1], &q[1]);
+    ASSERT_NE(&p[2], &q[2]);
+    ASSERT_NE(&p[3], &q[3]);   
+}
+
 TEST(Path, translate)
 {
     Path p("0,0 1,1");
