@@ -1,4 +1,4 @@
-CXXFLAGS = -g -O2 -Wall 
+CXXFLAGS = -g -Wall 
 
 APP = numptyphysics
 
@@ -54,9 +54,12 @@ Dialogs.cpp: help_text_html.h
 $(APP): $(OBJECTS) $(OBJECTS_OS)
 	$(CXX) -o $@ $^ $(LIBS)
 
-check: tester
+check: $(APP) tester
 	./tester
 
+leak-check: tester
+	valgrind --leak-check=full ./tester
+	
 gtest-all.o: $(GTEST_DIR)/src/gtest-all.cc
 	$(CXX) -c -I$(GTEST_DIR) -o $@ $^ $(LIBS) -lpthread
 	

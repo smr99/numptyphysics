@@ -18,7 +18,7 @@
 #define PATH_H
 
 #include "Common.h"
-#include "Array.h"
+#include <vector>
 
 
 class Segment
@@ -32,11 +32,10 @@ private:
 };
 
 
-class Path : public Array<Vec2>
+class Path : public std::vector<Vec2>
 {
 public:
   Path();
-  Path( int n, Vec2* p );
   Path( const char *ptlist );
 
   void makeRelative();
@@ -45,7 +44,25 @@ public:
   Path& rotate(const b2Rot& rot);
   Path& scale(float32 factor);
 
-  inline Vec2& origin() { return at(0); }
+  inline const Vec2& origin() const { return at(0); }
+  
+  inline void append(Vec2 v)
+  {
+      push_back(v);
+  }
+  
+  void trim( int i )
+  {
+    ASSERT( i < size() );
+    resize(size() - i);
+  }
+  
+  void erase( int i )
+  {
+    if (i < 0) return;
+    std::vector<Vec2>::iterator it = begin() + i;
+    std::vector<Vec2>::erase(it);
+  }
 
   inline Path& operator&(const Vec2& other) 
   {

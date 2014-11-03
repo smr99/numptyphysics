@@ -353,7 +353,7 @@ public:
     m_scene.draw( screen, area );
     if ( m_jointCandidates.size() ) {
       float32 rot = (float32)(drawCount&127) / 128.0f;
-      for ( int i=0; i<m_jointCandidates.size(); i++ ) {
+      for ( unsigned i=0; i<m_jointCandidates.size(); i++ ) {
 	Path joint = m_jointInd;
 	joint.translate( -joint.bbox().centroid() );
 	joint.rotate( b2Rot(rot*2.0*3.141) );

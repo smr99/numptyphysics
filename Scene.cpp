@@ -206,7 +206,7 @@ public:
     s << ":";
     Path opath = m_rawPath;
     opath.translate(m_origin);
-    for ( int i=0; i<opath.size(); i++ ) {
+    for ( unsigned i=0; i<opath.size(); i++ ) {
       const Vec2& p = opath.point(i);
       s <<' '<< p.x << ',' << p.y; 
     }
@@ -301,35 +301,6 @@ public:
       world->CreateJoint( &j );
       m_jointed[end] = true;
     }
-  }
-
-  bool maybeCreateJoint( b2World& world, Stroke* other )
-  {
-    if ( (m_attributes&ATTRIB_CLASSBITS)
-	 != (other->m_attributes&ATTRIB_CLASSBITS) ) {
-      return false; // can only joint matching classes
-    } else if ( hasAttribute(ATTRIB_GROUND) ) {
-      return true; // no point jointing grounds
-    } else if ( m_body && other->body() ) {
-      transform();
-      int n = m_xformedPath.numPoints();
-      for ( int end=0; end<2; end++ ) {
-	if ( !m_jointed[end] ) {
-	  const Vec2& p = m_xformedPath.point( end ? n-1 : 0 );
-	  if ( other->distanceTo( p ) <= JOINT_TOLERANCE ) {
-	    b2Vec2 pw = p;
-	    pw *= 1.0f/PIXELS_PER_METREf;
-	    JointDef j( m_body, other->m_body, pw );
-	    world.CreateJoint( &j );
-	    m_jointed[end] = true;
-	  }
-	}
-      }
-    }
-    if ( m_body ) {
-      return m_jointed[0] && m_jointed[1];
-    }
-    return true; ///nothing to do
   }
 
   void draw( Canvas& canvas, bool drawJoints=false )
