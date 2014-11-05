@@ -94,12 +94,6 @@ class Array
     }
   }
 
-  void trim( int i )
-  {
-    ASSERT( i < m_size );
-    m_size -= i;
-  }
-
   void reserve( int c )
   {
     if ( c >= m_size ) {
