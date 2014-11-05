@@ -27,13 +27,13 @@ class Array
 
   Array( int cap=0 ) : m_data(NULL), m_size(0), m_capacity(0)
   {
-    capacity( cap );
+    reserve( cap );
   }
   
  Array( int n, const T* d ) : m_data(NULL), m_size(0), m_capacity(0)
   {
     if ( n ) {
-      capacity( n );
+      reserve( n );
       memcpy( m_data, d, n * sizeof(T) );
       m_size = n;
     }
@@ -42,7 +42,7 @@ class Array
   Array( const Array& other ) : m_data(NULL), m_size(0), m_capacity(0)
   {
     if ( other.size() ) {
-      capacity( other.size() );
+      reserve( other.size() );
       memcpy( m_data, other.m_data, other.size() * sizeof(T) );
       m_size = other.size();
     }
@@ -115,7 +115,7 @@ class Array
     m_size -= i;
   }
 
-  void capacity( int c )
+  void reserve( int c )
   {
     if ( c >= m_size ) {
       if ( m_capacity ) {
@@ -151,7 +151,7 @@ class Array
   {
     m_size = 0;
     if ( other.size() ) {
-      capacity( other.size() );
+      reserve( other.size() );
       memcpy( m_data, other.m_data, other.size() * sizeof(T) );
       m_size = other.size();
     }
@@ -166,7 +166,7 @@ class Array
       while ( newc < c  ) {
 	newc += newc;
       }
-      capacity( newc );
+      reserve( newc );
     }
   }
 
