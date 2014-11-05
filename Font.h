@@ -19,7 +19,6 @@
 
 #include "Common.h"
 #include "Path.h"
-#include "Array.h"
 #include <string>
 #include <SDL_ttf.h>
 
