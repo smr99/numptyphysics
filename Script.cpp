@@ -53,7 +53,7 @@ std::string ScriptEntry::asString()
   return s.str();
 }
 
-std::string ScriptLog::asString( int i )
+std::string ScriptLog::asString( std::size_t i )
 {
   if ( i < size() ) {
     return at(i).asString();
@@ -94,7 +94,7 @@ void ScriptRecorder::start( ScriptLog* log )
 void ScriptRecorder::stop()  
 { 
   if ( m_running ) {
-    for ( int i=0; i<m_log->size(); i++ ) {
+    for ( std::size_t i=0; i<m_log->size(); i++ ) {
       std::string e = m_log->asString(i);
     }
     m_running = false; 

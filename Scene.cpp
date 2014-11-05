@@ -929,7 +929,7 @@ bool Scene::save( const std::string& file, bool saveLog )
     }
 
     if ( saveLog ) {      
-      for ( int i=0; i<m_log.size(); i++ ) {
+      for ( size_t i=0; i<m_log.size(); i++ ) {
 	o << "E: " << m_log.asString( i ) <<std::endl;
       }
     }
