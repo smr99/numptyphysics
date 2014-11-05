@@ -83,21 +83,6 @@ class Array
     m_data[ m_size++ ] = t;
   }
 
-  void insert( int i, const T& t )
-  {
-    if ( i==m_size ) {
-      push_back( t );
-    } else {
-      ASSERT( i < m_size );
-      ensureCapacity( m_size + 1 );
-      for ( int j=m_size-1; j>=i; j-- ) {
-	m_data[j+1] = m_data[j];
-      }
-      m_data[ i ] = t;
-      m_size++;
-    }
-  }
-
   void erase( int i )
   {
     if (i >= 0 ) {
