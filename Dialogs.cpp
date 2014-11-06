@@ -508,13 +508,14 @@ public:
   }
   void remove( Widget* w )
   {
-    if (w && m_opts.indexOf((IconButton*)w) >= 0) {
-      m_opts.erase(m_opts.indexOf((IconButton*)w));
-    }
+      IconButton* ibutton = dynamic_cast<IconButton*>(w);
+      if (ibutton) {
+	  erase(m_opts, ibutton);
+      }
   }
   void updateTicks()
   {
-    for (int i=0; i<m_opts.size(); i++) {
+    for (size_t i=0; i<m_opts.size(); i++) {
       bool tick = false;
       if (m_opts[i]->text() == "ground") {
 	tick = m_game->m_strokeFixed;
@@ -566,7 +567,7 @@ public:
   }
 private:
   GameControl *m_game;
-  Array<IconButton*> m_opts;
+  std::vector<IconButton*> m_opts;
 };
 
 

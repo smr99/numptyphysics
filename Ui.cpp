@@ -23,6 +23,7 @@
 
 static int indent = 0;
 
+
 ////////////////////////////////////////////////////////////////
 
 
@@ -339,7 +340,7 @@ void RichText::draw( Canvas& screen, const Rect& area )
     m_layoutRequired = false;
   }
   screen.setClip(area.tl.x,area.tl.y,area.width(),area.height());
-  for (int l=0; l<m_snippets.size(); l++) {
+  for (size_t l=0; l<m_snippets.size(); l++) {
     if (m_snippets[l].textlen > 0) {
       Vec2 pos = m_pos.tl + m_snippets[l].pos;
       Vec2 posnext = l==m_snippets.size()-1 ? pos:m_pos.tl+m_snippets[l+1].pos;
@@ -683,7 +684,7 @@ Container::Container()
 
 Container::~Container()
 {
-  for (int i=0; i<m_children.size(); ++i) {
+  for (size_t i=0; i<m_children.size(); ++i) {
     delete m_children[i];
   }
 }
@@ -692,7 +693,7 @@ std::string Container::toString()
 {
   std::string s = Widget::toString();
   indent++;
-  for (int i=0; i<m_children.size(); ++i) {
+  for (size_t i=0; i<m_children.size(); ++i) {
     s += m_children[i]->toString();
   }
   indent--;
@@ -702,7 +703,7 @@ std::string Container::toString()
 void Container::move( const Vec2& by )
 {
   WidgetParent::move(by);
-  for (int i=0; i<m_children.size(); ++i) {
+  for (size_t i=0; i<m_children.size(); ++i) {
     m_children[i]->move(by);
   }  
 }
@@ -712,7 +713,7 @@ bool Container::isDirty()
   if (m_dirty) {
     return true;
   }
-  for (int i=0; i<m_children.size(); ++i) {
+  for (size_t i=0; i<m_children.size(); ++i) {
     if (m_children[i]->isDirty()) {
       return true;
     }
@@ -726,7 +727,7 @@ Rect Container::dirtyArea()
     return m_pos;
   }
   Rect r;
-  for (int i=0; i<m_children.size(); ++i) {
+  for (size_t i=0; i<m_children.size(); ++i) {
     r.expand(m_children[i]->dirtyArea());
   }
   return r;
@@ -734,7 +735,7 @@ Rect Container::dirtyArea()
 
 void Container::onTick( int tick )
 {
-  for (int i=0; i<m_children.size(); ++i) {
+  for (size_t i=0; i<m_children.size(); ++i) {
     m_children[i]->onTick(tick);
   }
 }
@@ -742,7 +743,7 @@ void Container::onTick( int tick )
 void Container::draw( Canvas& screen, const Rect& area )
 {
   WidgetParent::draw(screen,area);
-  for (int i=0; i<m_children.size(); ++i) {
+  for (size_t i=0; i<m_children.size(); ++i) {
     if (m_children[i]->position().intersects(area)) {
       Rect relArea = area;
       relArea.clipTo(m_children[i]->position());
@@ -795,7 +796,7 @@ bool Container::processEvent( SDL_Event& ev )
 
 void Container::onResize()
 {
-  for (int i=0; i<m_children.size(); ++i) {
+  for (size_t i=0; i<m_children.size(); ++i) {
     if (m_children[i]->fitToParent()) {
       m_children[i]->moveTo(m_pos.tl);
       m_children[i]->sizeTo(m_pos.size());
@@ -818,9 +819,10 @@ void Container::add( Widget* w, int x, int y )
 void Container::remove( Widget* w )
 {
   if (w) {
-    if (m_children.indexOf(w) >= 0) {
+      int index = indexOf(m_children, w);
+    if (index >= 0) {
       w->setParent(NULL);
-      m_children.erase(m_children.indexOf(w));
+      m_children.erase(m_children.begin() + index);
       dirty();
       delete w;
     }
@@ -847,7 +849,7 @@ Box::Box(int spacing, bool vertical)
 void Box::onResize()
 {
   int totalw=-m_spacing, totalg=0;
-  for (int i=0; i<m_sizes.size(); ++i) {
+  for (size_t i=0; i<m_sizes.size(); ++i) {
     totalw += m_sizes[i] + m_spacing;
     totalg += m_growths[i];
   }
@@ -856,7 +858,7 @@ void Box::onResize()
   extra = extra > 0 ? extra : 0;
   Vec2 org(m_pos.tl);
 
-  for (int i=0; i<m_sizes.size(); ++i) {
+  for (size_t i=0; i<m_sizes.size(); ++i) {
     m_children[i]->moveTo(org);
     int incr = totalg>0 ? m_growths[i] * extra / totalg : 0;
     if (m_vertical) {
@@ -879,10 +881,11 @@ void Box::add( Widget* w, int dim, int grow )
 
 void Box::remove( Widget* w )
 {
-  m_sizes.erase(m_children.indexOf(w));
-  m_growths.erase(m_children.indexOf(w));
-  Panel::remove(w);
-  onResize();
+    int index = indexOf(m_children, w);
+    m_sizes.erase(m_sizes.begin() + index);
+    m_growths.erase(m_growths.begin() + index);
+    Panel::remove(w);
+    onResize();
 }
 
 
@@ -922,7 +925,7 @@ TabBook::TabBook()
 TabBook::~TabBook()
 {
   selectTab(-1);
-  for (int i=0; i<m_panels.size(); ++i) {
+  for (size_t i=0; i<m_panels.size(); ++i) {
     delete m_panels[i];
   }
 }
@@ -968,7 +971,7 @@ void TabBook::selectTab( int t )
 {
   if (m_contents) {
     m_tabs[m_selected]->setBg(DEFAULT_BG);
-    m_children.erase(m_children.indexOf(m_contents));
+    erase(m_children, m_contents);
     m_contents = NULL;
     dirty();
   }
@@ -1091,7 +1094,7 @@ MenuDialog::MenuDialog( Widget* evtarget, const std::string &title, const MenuIt
 bool MenuDialog::onEvent( Event& ev )
 {
   if (ev.code == Event::SELECT
-      && ev.x >= 0 && ev.x < m_items.size()
+      && ev.x >= 0 && ev.x < static_cast<int>(m_items.size())
       && ev.y == -777
       && m_target
       && m_target->dispatchEvent(m_items[ev.x]->event)) {
@@ -1111,7 +1114,7 @@ void MenuDialog::layout()
   m_box->empty();
   m_box->add( new Spacer(), 1, 4 );
   Box *row = NULL;
-  for (int i=0; i<m_items.size(); i++) {
+  for (size_t i=0; i<m_items.size(); i++) {
     if ((i%m_columns)==0) {
       if (row) row->add( new Spacer(), 1, 1 );
       row = new HBox(BUTTON_SPACING);
@@ -1122,7 +1125,7 @@ void MenuDialog::layout()
   }  
   if (row) {
     if (m_items.size()%m_columns > 0) {
-      for (int i=0; i<m_columns-(m_items.size()%m_columns); i++) {
+      for (size_t i=0; i<m_columns-(m_items.size()%m_columns); i++) {
 	row->add( new Spacer(), m_buttonDim.x, 0 );
       }
     }

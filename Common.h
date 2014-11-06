@@ -18,6 +18,10 @@
 #define COMMON_H
 
 #include "Box2D.h"
+#include <vector>
+#include <algorithm>
+
+
 #define ARRAY_SIZE(aRR) (sizeof(aRR)/sizeof((aRR)[0]))
 #define ASSERT(a)
 
@@ -25,6 +29,25 @@
 #define FIXED_ONE (1<<FIXED_SHIFT)
 #define FLOAT32_TO_FIXED(float32) ((int)(float32*(float32)FIXED_ONE))
 #define FIXED_TO_INT(iNT) ((iNT)>>FIXED_SHIFT)
+
+template <class T>
+inline int indexOf(const std::vector<T>& vec, const T& val)
+{
+    typename std::vector<T>::const_iterator it = std::find(vec.begin(), vec.end(), val);
+    if (it == vec.end())
+	return -1;
+    return it - vec.begin();
+}
+
+template <class T>
+inline bool erase(std::vector<T>& vec, const T& val)
+{
+    typename std::vector<T>::iterator it = std::find(vec.begin(), vec.end(), val);
+    if (it == vec.end())
+	return false;
+    vec.erase(it);
+    return true;
+}
 
 
 /**
