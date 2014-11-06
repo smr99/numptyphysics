@@ -22,6 +22,10 @@
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
+#include <algorithm>
+
+
+using namespace std;
 
 
 Transform::Transform( float32 scale, float32 rotation, const Vec2& translation )
@@ -544,10 +548,14 @@ Stroke* Scene::newStroke( const Path& p, int colour, int attribs ) {
 
 bool Scene::deleteStroke( Stroke *s ) {
   if ( s ) {
-    int i = m_strokes.indexOf(s);
+    vector<Stroke*>::iterator it = find(m_strokes.begin(), m_strokes.end(), s);
+    if (it == m_strokes.end())
+	return false;
+    
+    int i = it - m_strokes.begin();
     if ( i >= m_protect ) {
 	reset(s);
-	m_strokes.erase( i );
+	m_strokes.erase( it );
 	m_deletedStrokes.push_back( s );
 	m_recorder.deleteStroke( i );
 	return true;
@@ -560,7 +568,11 @@ bool Scene::deleteStroke( Stroke *s ) {
 void Scene::extendStroke( Stroke* s, const Vec2& pt )
 {
   if ( s ) {
-    int i = m_strokes.indexOf(s);
+    vector<Stroke*>::iterator it = find(m_strokes.begin(), m_strokes.end(), s);
+    if (it == m_strokes.end())
+	return;
+
+    int i = it - m_strokes.begin();
     if ( i >= m_protect ) {
       s->addPoint( pt );
       m_recorder.extendStroke( i, pt );
@@ -571,7 +583,11 @@ void Scene::extendStroke( Stroke* s, const Vec2& pt )
 void Scene::moveStroke( Stroke* s, const Vec2& origin )
 {
   if ( s ) {
-    int i = m_strokes.indexOf(s);
+    vector<Stroke*>::iterator it = find(m_strokes.begin(), m_strokes.end(), s);
+    if (it == m_strokes.end())
+	return;
+
+    int i = it - m_strokes.begin();
     if ( i >= m_protect ) {
       s->origin( origin );
       m_recorder.moveStroke( i, origin );
@@ -584,7 +600,13 @@ bool Scene::activateStroke( Stroke *s )
 {
   if (!activate(s))
     return false;
-  m_recorder.activateStroke( m_strokes.indexOf(s) );
+
+  vector<Stroke*>::iterator it = find(m_strokes.begin(), m_strokes.end(), s);
+  if (it == m_strokes.end())
+      return false;
+
+  int i = it - m_strokes.begin();
+  m_recorder.activateStroke( i );
   return true;
 }
 
@@ -614,10 +636,10 @@ bool Scene::activate( Stroke *s )
 
 void Scene::activateAll()
 {
-  for ( int i=0; i < m_strokes.size(); i++ ) {
+  for ( size_t i=0; i < m_strokes.size(); i++ ) {
     m_strokes[i]->createBodies( *m_world );
   }
-  for ( int i=0; i < m_strokes.size(); i++ ) {
+  for ( size_t i=0; i < m_strokes.size(); i++ ) {
     createJoints( m_strokes[i] );
   }
 }
@@ -678,14 +700,14 @@ void Scene::step( bool isPaused )
     }
     
     // clean up delete strokes
-    for ( int i=0; i< m_strokes.size(); i++ ) {
+    for ( size_t i=0; i< m_strokes.size(); i++ ) {
       if ( m_strokes[i]->hasAttribute(ATTRIB_DELETED) ) {
 	m_strokes[i]->clearAttribute(ATTRIB_DELETED);
 	m_strokes[i]->hide();
       }	   
     }
     // check for token respawn
-    for ( int i=0; i < m_strokes.size(); i++ ) {
+    for ( size_t i=0; i < m_strokes.size(); i++ ) {
       if ( m_strokes[i]->hasAttribute( ATTRIB_TOKEN )
 	   && !BOUNDS_RECT.intersects( m_strokes[i]->worldBbox() ) ) {
 	reset( m_strokes[i] );
@@ -717,7 +739,7 @@ void Scene::BeginContact(b2Contact* contact)
 
 bool Scene::isCompleted()
 {
-  for ( int i=0; i < m_strokes.size(); i++ ) {
+  for ( size_t i=0; i < m_strokes.size(); i++ ) {
     if ( m_strokes[i]->hasAttribute( ATTRIB_GOAL )
 	   && !m_strokes[i]->hidden() ) {
 	return false;
@@ -734,7 +756,7 @@ Rect Scene::dirtyArea()
 void Scene::calcDirtyArea()
 {
   Rect r;
-  for ( int i=0; i<m_strokes.size(); i++ ) {
+  for ( size_t i=0; i<m_strokes.size(); i++ ) {
     if ( m_strokes[i]->isDirty() ) {
       // acumulate new areas to draw
       r.expand( m_strokes[i]->screenBbox() );
@@ -742,7 +764,7 @@ void Scene::calcDirtyArea()
       r.expand( m_strokes[i]->lastDrawnBbox() );
     }
   }
-  for ( int i=0; i<m_deletedStrokes.size(); i++ ) {
+  for ( size_t i=0; i<m_deletedStrokes.size(); i++ ) {
     // acumulate new areas to draw
     r.expand( m_strokes[i]->lastDrawnBbox() );
   }
@@ -765,24 +787,24 @@ void Scene::draw( Canvas& canvas, const Rect& area )
   clipArea.tl.y--;
   clipArea.br.x++;
   clipArea.br.y++;
-  for ( int i=0; i<m_strokes.size(); i++ ) {
+  for ( size_t i=0; i<m_strokes.size(); i++ ) {
     if ( area.intersects( m_strokes[i]->screenBbox() ) ) {
 	m_strokes[i]->draw( canvas );
     }
   }
   while ( m_deletedStrokes.size() ) {
     delete m_deletedStrokes[0];
-    m_deletedStrokes.erase(0);
+    m_deletedStrokes.erase(m_deletedStrokes.begin());
   }
 }
 
 void Scene::reset( Stroke* s, bool purgeUnprotected )
 {
-  while ( purgeUnprotected && m_strokes.size() > m_protect ) {
+  while ( purgeUnprotected && m_strokes.size() > static_cast<size_t>(m_protect) ) {
     m_strokes[m_strokes.size()-1]->reset(m_world);
-    m_strokes.erase( m_strokes.size()-1 );
+    m_strokes.erase( --m_strokes.end() );
   }
-  for ( int i=0; i<m_strokes.size(); i++ ) {
+  for ( size_t i=0; i<m_strokes.size(); i++ ) {
     if (s==NULL || s==m_strokes[i]) {
 	m_strokes[i]->reset(m_world);
     }
@@ -792,7 +814,7 @@ void Scene::reset( Stroke* s, bool purgeUnprotected )
 Stroke* Scene::strokeAtPoint( const Vec2 pt, float32 max )
 {
   Stroke* best = NULL;
-  for ( int i=0; i<m_strokes.size(); i++ ) {
+  for ( size_t i=0; i<m_strokes.size(); i++ ) {
     float32 d = m_strokes[i]->distanceTo( pt );
     if ( d < max ) {
 	max = d;
@@ -807,11 +829,11 @@ void Scene::clear()
   reset();
   while ( m_strokes.size() ) {
     delete m_strokes[0];
-    m_strokes.erase(0);
+    m_strokes.erase(m_strokes.begin());
   }
   while ( m_deletedStrokes.size() ) {
     delete m_deletedStrokes[0];
-    m_deletedStrokes.erase(0);
+    m_deletedStrokes.erase(m_strokes.begin());
   }
   if ( m_world ) {
     //step is required to actually destroy bodies and joints
@@ -924,7 +946,7 @@ bool Scene::save( const std::string& file, bool saveLog )
     o << "Title: "<<m_title<<std::endl;
     o << "Author: "<<m_author<<std::endl;
     o << "Background: "<<m_bg<<std::endl;
-    for ( int i=0; i<m_strokes.size() && (!saveLog || i<m_protect); i++ ) {
+    for ( size_t i=0; i<m_strokes.size() && (!saveLog || i< static_cast<size_t>(m_protect)); i++ ) {
 	o << m_strokes[i]->asString();
     }
 

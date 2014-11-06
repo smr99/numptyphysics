@@ -14,14 +14,13 @@
  *
  */
 #include "Common.h"
-#include "Array.h"
 #include "Path.h"
 #include "Canvas.h"
 #include "Script.h"
 
 #include <string>
 #include <fstream>
-
+#include <vector>
 
 class Stroke;
 class b2World;
@@ -59,7 +58,7 @@ public:
     return m_strokes.size();
   }
 
-  Array<Stroke*>& strokes() {
+  std::vector<Stroke*>& strokes() {
     return m_strokes;
   }
 
@@ -96,8 +95,8 @@ private:
 
 
   b2World        *m_world;
-  Array<Stroke*>  m_strokes;
-  Array<Stroke*>  m_deletedStrokes;
+  std::vector<Stroke*>  m_strokes;
+  std::vector<Stroke*>  m_deletedStrokes;
   std::string     m_title, m_author, m_bg;
   ScriptLog       m_log;
   ScriptRecorder  m_recorder;
