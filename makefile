@@ -73,7 +73,7 @@ tester: $(OBJECTS_TEST)
 	$(CXX) -o $@ $^ $(LIBS) -lpthread
 	
 clean:
-	rm -f $(OBJECTS) $(OBJECTS_OS) $(OBJECTS_TEST) $(OBJECTS_OS_TEST)
+	rm -f $(APP) $(OBJECTS) $(OBJECTS_OS) $(OBJECTS_TEST) $(OBJECTS_OS_TEST)
 	rm -f $(DEPENDENCIES)
 	rm -f help_text_html.h
 
