@@ -15,7 +15,6 @@
  */
 
 #include "Common.h"
-#include "Array.h"
 #include "Config.h"
 #include "Game.h"
 #include "Scene.h"
@@ -32,6 +31,11 @@
 #include <unistd.h>
 #include <SDL.h>
 #include <stdexcept>
+#include <vector>
+
+
+using namespace std;
+
 
 class App : private Container
 {
@@ -45,7 +49,7 @@ class App : private Container
   bool  m_drawFps;
   bool  m_drawDirty;
   int   m_renderRate;
-  Array<const char*> m_files;
+  vector<const char*> m_files;
   Window            *m_window;
 public:
   App(int argc, char** argv)
@@ -97,11 +101,11 @@ public:
     if ( m_testOp.length() > 0 ) {
       test( m_testOp );
     } else if ( m_thumbnailMode ) {
-      for ( int i=0; i<m_files.size(); i++ ) {
+      for ( size_t i=0; i<m_files.size(); i++ ) {
 	renderThumbnail( m_files[i], m_width, m_height );
       }
     } else if ( m_videoMode ) {
-      for ( int i=0; i<m_files.size(); i++ ) {
+      for ( size_t i=0; i<m_files.size(); i++ ) {
 	renderVideo( m_files[i], m_width, m_height );
       }
     } else {      
@@ -167,12 +171,12 @@ private:
     }
   }
 
-  void runGame( Array<const char*>& files, int width, int height )
+  void runGame( vector<const char*>& files, int width, int height )
   {
     Levels levels;
     
     if ( files.size() > 0 ) {
-      for ( int i=0; i<files.size(); i++ ) {
+      for ( size_t i=0; i<files.size(); i++ ) {
 	levels.addPath( files[i] );
       }
     } else {
@@ -334,7 +338,7 @@ private:
   {
     if ( op=="levels" ) {
       Levels levels;
-      for ( int i=0; i<m_files.size(); i++ ) {
+      for ( size_t i=0; i<m_files.size(); i++ ) {
 	levels.addPath( m_files[i] );
 	fprintf(stderr,"LEVELS after %s\n",m_files[i]);
 	for (int j=0; j<levels.numLevels(); j++) {
