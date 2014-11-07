@@ -14,7 +14,6 @@
  *
  */
 #include "Common.h"
-#include "Array.h"
 #include "Config.h"
 #include "Scene.h"
 #include "Accelerometer.h"
@@ -23,6 +22,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <algorithm>
+#include <vector>
 
 
 using namespace std;
@@ -273,7 +273,7 @@ public:
     transform();
   }
 
-  void determineJoints( Stroke* other, Array<Joint>& joints )
+  void determineJoints( Stroke* other, vector<Joint>& joints )
   {
     if ( (m_attributes&ATTRIB_CLASSBITS)
 	 != (other->m_attributes&ATTRIB_CLASSBITS)
@@ -612,7 +612,7 @@ bool Scene::activateStroke( Stroke *s )
 
 void Scene::getJointCandidates( Stroke* s, Path& pts )
 {
-  Array<Joint> joints;
+  vector<Joint> joints;
   for ( int j=m_strokes.size()-1; j>=0; j-- ) {      
     if ( s != m_strokes[j] ) {
       s->determineJoints( m_strokes[j], joints );
@@ -649,12 +649,12 @@ void Scene::createJoints( Stroke *s )
   if ( s->body()==NULL ) {
     return;
   }
-  Array<Joint> joints;
+  vector<Joint> joints;
   for ( int j=m_strokes.size()-1; j>=0; j-- ) {      
     if ( s != m_strokes[j] && m_strokes[j]->body() ) {
       s->determineJoints( m_strokes[j], joints );
       m_strokes[j]->determineJoints( s, joints );
-      for ( int i=0; i<joints.size(); i++ ) {
+      for ( size_t i=0; i<joints.size(); i++ ) {
 	joints[i].joiner->join( m_world, joints[i].joinee, joints[i].end );
       }
       joints.clear();
